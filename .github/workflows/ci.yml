@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+jobs:
+  gitleaks:
+    name: Secret Scan
+    uses: aGora-Ops/agora-workflows/.github/workflows/gitleaks.yml@main
+    with:
+      service_name: agora-frontend
+
+  node-ci:
+    name: Lint, Type-Check & Build
+    uses: aGora-Ops/agora-workflows/.github/workflows/node-ci.yml@main
+    with:
+      working-directory: .
+      node-version: "20"
+
+  build:
+    name: Build & Scan
+    needs: [gitleaks, node-ci]
+    uses: aGora-Ops/agora-workflows/.github/workflows/build-and-scan.yml@main
+    with:
+      service_name: agora-frontend
+      dockerfile_path: Dockerfile
+      aws_region: us-east-1
+      run_trivy: true
+    secrets: inherit
+
+  push:
+    name: Push to ECR
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: aGora-Ops/agora-workflows/.github/workflows/push-to-ecr.yml@main
+    with:
+      service_name: agora-frontend
+      git_tag: ${{ needs.build.outputs.tag }}
+      tag_exists: ${{ needs.build.outputs.tag_exists }}
+      aws_region: us-east-1
+    secrets: inherit
+
+  helm-update:
+    name: Update Helm Tag
+    needs: push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: aGora-Ops/agora-workflows/.github/workflows/helm-update.yml@main
+    with:
+      service_name: agora-frontend
+      image_tag: ${{ needs.push.outputs.tag }}
+      target_branch: main
+    secrets: inherit
+
+  notify:
+    name: Notify on Failure
+    needs: [node-ci, build, push, helm-update]
+    if: always() && contains(needs.*.result, 'failure')
+    uses: aGora-Ops/agora-workflows/.github/workflows/notify.yml@main
+    with:
+      service_name: agora-frontend
+      build_result: ${{ needs.build.result }}
+      push_result: ${{ needs.push.result }}
+      trivy_result: ${{ needs.build.outputs.trivy_result }}
+    secrets: inherit
