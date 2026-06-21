@@ -295,7 +295,7 @@ export default function RemediationDetailPage() {
                     Analyzing with AWS Bedrock…
                   </p>
                   <p className="text-xs text-zinc-400">
-                    Claude 3.5 Sonnet is reading the failure logs and generating a suggested fix.
+                    Amazon Nova is reading the failure logs and generating a suggested fix.
                   </p>
                 </div>
               </CardContent>
