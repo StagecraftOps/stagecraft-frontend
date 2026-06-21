@@ -140,13 +140,16 @@ export function Sidebar({ user }: SidebarProps) {
               <p className="text-xs text-zinc-500 truncate">@{user.login}</p>
             </div>
           </div>
-          <a
-            href={`${API_URL}/api/v1/auth/logout`}
+          <button
+            onClick={async () => {
+              await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' })
+              window.location.href = '/'
+            }}
             className="mt-3 flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-xs text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
           >
             <LogOut size={14} />
             Disconnect
-          </a>
+          </button>
         </div>
       )}
     </aside>
