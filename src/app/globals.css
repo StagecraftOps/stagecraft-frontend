@@ -21,6 +21,29 @@
     @apply bg-zinc-50 text-zinc-800 font-medium;
   }
 
+  .dark body {
+    @apply bg-zinc-950 text-zinc-100;
+  }
+
+  /* Smooth theme transition on color-bearing surfaces */
+  body,
+  body * {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* ── Dark-mode palette remap, scoped to the dashboard shell ──────────
+     Covers every dashboard page at once without editing each file. The
+     landing page (outside .app-shell) keeps its own light design. */
+  .dark .app-shell .bg-white { background-color: rgb(24 24 27); }       /* zinc-900 */
+  .dark .app-shell .bg-zinc-50 { background-color: rgb(9 9 11); }       /* zinc-950 */
+  .dark .app-shell .bg-zinc-100 { background-color: rgb(39 39 42); }    /* zinc-800 */
+  .dark .app-shell .text-zinc-900 { color: rgb(244 244 245); }          /* zinc-100 */
+  .dark .app-shell .text-zinc-800 { color: rgb(228 228 231); }          /* zinc-200 */
+  .dark .app-shell .text-zinc-700 { color: rgb(212 212 216); }          /* zinc-300 */
+  .dark .app-shell .text-zinc-600 { color: rgb(161 161 170); }          /* zinc-400 */
+  .dark .app-shell .border-zinc-200 { border-color: rgb(39 39 42); }    /* zinc-800 */
+  .dark .app-shell .border-zinc-100 { border-color: rgb(39 39 42); }    /* zinc-800 */
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

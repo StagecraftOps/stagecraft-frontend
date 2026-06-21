@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Bot, AlertCircle, GitBranch, Clock, Hash } fro
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { fetchRun, fetchRemediations, fetchRunLogs } from '@/lib/api'
+import { LogViewer } from '@/components/workflows/log-viewer'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -229,9 +230,7 @@ export default function RunDetailPage() {
                   </p>
                 </div>
               ) : (
-                <pre className="bg-zinc-900 text-zinc-100 text-xs font-mono rounded-md p-4 overflow-x-auto max-h-[500px] overflow-y-auto whitespace-pre-wrap leading-relaxed">
-                  {logs || 'No log output.'}
-                </pre>
+                <LogViewer logs={logs || 'No log output.'} />
               )}
             </CardContent>
           </Card>
