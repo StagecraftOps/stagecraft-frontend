@@ -10,7 +10,6 @@ import {
   Wrench,
   BarChart2,
   MessageSquare,
-  FlaskConical,
   Settings,
   LogOut,
 } from 'lucide-react'
@@ -48,12 +47,6 @@ const navItems = [
     label: 'Pipeline Chat',
     href: '/chat',
     icon: MessageSquare,
-  },
-  {
-    label: 'K8s Remediation',
-    href: '/k8s-remediation',
-    icon: FlaskConical,
-    beta: true,
   },
   {
     label: 'Settings',
