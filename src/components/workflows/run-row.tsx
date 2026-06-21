@@ -1,4 +1,6 @@
-import Link from 'next/link'
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { GitBranch, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatRelativeTime, calculateDuration, formatSha, truncate } from '@/lib/utils'
@@ -13,19 +15,20 @@ interface RunRowProps {
 }
 
 export function RunRow({ run, showWorkflow = true, showRepo = true, className }: RunRowProps) {
+  const router = useRouter()
   const displayStatus =
     run.status === 'completed' ? (run.conclusion ?? 'neutral') : run.status
 
   return (
-    <tr className={cn('hover:bg-zinc-50 transition-colors', className)}>
+    <tr
+      onClick={() => router.push(`/runs/${run.id}`)}
+      className={cn('hover:bg-zinc-50 transition-colors cursor-pointer', className)}
+    >
       {showWorkflow && (
         <td className="py-3 px-4 text-sm">
-          <Link
-            href={`/runs/${run.id}`}
-            className="font-medium text-zinc-800 hover:text-amber-700 transition-colors"
-          >
+          <span className="font-medium text-zinc-800">
             {truncate(run.workflow_name ?? `Run #${run.github_run_id}`, 40)}
-          </Link>
+          </span>
         </td>
       )}
       {showRepo && (
@@ -59,6 +62,7 @@ export function RunRow({ run, showWorkflow = true, showRepo = true, className }:
             href={run.html_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="text-zinc-400 hover:text-amber-600 transition-colors"
           >
             <ExternalLink size={13} />
