@@ -104,11 +104,6 @@ export function Sidebar({ user }: SidebarProps) {
                 )}
               />
               <span className="flex-1">{item.label}</span>
-              {'beta' in item && item.beta && (
-                <span className="text-[10px] font-medium bg-amber-100 text-amber-700 border border-amber-200 rounded-full px-1.5 py-0.5 leading-none">
-                  β
-                </span>
-              )}
             </Link>
           )
         })}
