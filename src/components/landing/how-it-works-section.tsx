@@ -49,7 +49,7 @@ POST /orgs/{org}/hooks
     number: 'III',
     title: 'AI suggests the fix',
     description:
-      'When a run fails, AWS Bedrock (Claude 3.5 Sonnet) reads the failure logs and the workflow YAML. It identifies the root cause and produces a corrected YAML file. You review the suggestion — nothing is committed without your approval.',
+      'When a run fails, AWS Bedrock (Amazon Nova) reads the failure logs and the workflow YAML. It identifies the root cause and produces a corrected YAML file. You review the suggestion — nothing is committed without your approval.',
     code: `# POST /api/v1/remediations/{id}/raise-pr
 # Only called when YOU click "Raise PR"
 
