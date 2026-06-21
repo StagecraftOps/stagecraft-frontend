@@ -22,11 +22,11 @@ interface ChatApiResponse {
 }
 
 const SUGGESTIONS = [
-  'How many workflow failures happened this week?',
-  'Which repos have the most failures?',
-  'Show me all auth failures in the last 30 days',
-  'What is the average confidence score of my remediations?',
-  'Which workflows have never been fixed?',
+  'What are the most common root causes of our failures?',
+  'How do we usually fix dependency version errors?',
+  'Summarize the auth failures and their fixes',
+  'What kinds of issues affect agora-api the most?',
+  'Have we seen this kind of build error before?',
 ]
 
 function SqlBlock({ sql }: { sql: string }) {
