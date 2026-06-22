@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import type { AxiosError } from 'axios'
 import {
   ArrowLeft,
   ExternalLink,
@@ -162,6 +163,11 @@ export default function RemediationDetailPage() {
   const isPrRaised = remediation.status === 'pr_raised'
   const isFailed = remediation.status === 'failed'
   const hasResult = isAnalyzed || isPrRaised
+  const hasSuggestedYaml = Boolean(remediation.suggested_yaml)
+  const canRaisePr = isAnalyzed && hasSuggestedYaml
+  const raisePrErrorMessage =
+    (raisePrMutation.error as AxiosError<{ detail?: string }> | null)?.response?.data?.detail
+    ?? 'Failed to create PR on GitHub.'
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -208,7 +214,7 @@ export default function RemediationDetailPage() {
               <ExternalLink size={12} />
             </a>
           )}
-          {isAnalyzed && (
+          {canRaisePr && (
             <Button
               variant="primary"
               onClick={() => raisePrMutation.mutate()}
@@ -232,7 +238,7 @@ export default function RemediationDetailPage() {
         {raisePrMutation.isError && (
           <div className="flex items-center gap-2 mt-4 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-4 py-3">
             <AlertCircle size={14} />
-            <p className="text-sm">Failed to create PR on GitHub. Check your token has repo write access.</p>
+            <p className="text-sm">{raisePrErrorMessage}</p>
           </div>
         )}
       </div>
@@ -279,6 +285,24 @@ export default function RemediationDetailPage() {
                   yaml={remediation.suggested_yaml}
                   filename={remediation.workflow_file}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {isAnalyzed && !hasSuggestedYaml && (
+            <Card>
+              <CardContent>
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-100 rounded-lg">
+                  <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-900 mb-1">
+                      No YAML suggestion available
+                    </p>
+                    <p className="text-sm text-amber-800 leading-relaxed">
+                      AI identified the root cause, but it did not produce a valid workflow YAML fix for this remediation.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
