@@ -24,6 +24,15 @@ jobs:
       working-directory: .
       node-version: "20"
 
+  sonar:
+    name: SonarCloud Scan
+    uses: aGora-Ops/agora-workflows/.github/workflows/sonar-scan.yml@main
+    with:
+      service_name: agora-frontend
+      working-directory: .
+      sonar_organization: ${{ vars.SONAR_ORGANIZATION }}
+    secrets: inherit
+
   build:
     name: Build & Scan
     needs: [gitleaks, node-ci]
@@ -60,7 +69,7 @@ jobs:
 
   notify:
     name: Notify on Failure
-    needs: [node-ci, build, push, helm-update]
+    needs: [node-ci, sonar, build, push, helm-update]
     if: always() && contains(needs.*.result, 'failure')
     uses: aGora-Ops/agora-workflows/.github/workflows/notify.yml@main
     with:
