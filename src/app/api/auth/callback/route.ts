@@ -6,13 +6,13 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code') ?? ''
   const state = searchParams.get('state') ?? ''
 
-  // When API_URL is empty (same-domain path routing), reconstruct the public
-  // URL from request headers — nextUrl.origin returns 0.0.0.0:3000 (container
-  // bind address) which is wrong when running behind kGateway/NLB.
-  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'localhost'
-  const proto = request.headers.get('x-forwarded-proto') || 'http'
-  const base = API_URL || `${proto}://${host}`
-  const backendUrl = `${base}/api/v1/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+  // Preserve the browser's HTTPS origin when the frontend and API share the
+  // same public domain. Rebuilding an absolute URL from forwarded headers can
+  // accidentally downgrade to http and break secure cookies on the callback.
+  const base = API_URL || request.url
+  const backendUrl = new URL('/api/v1/auth/callback', base)
+  backendUrl.searchParams.set('code', code)
+  backendUrl.searchParams.set('state', state)
 
   return NextResponse.redirect(backendUrl)
 }
