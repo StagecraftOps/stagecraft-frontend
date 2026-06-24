@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { API_URL } from '@/lib/config'
 
 export function CtaSection() {
   const [visible, setVisible] = useState(false)
@@ -46,7 +45,7 @@ export function CtaSection() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href={`${API_URL}/api/v1/auth/github`}
+                href="/api/auth/github"
                 className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white px-8 h-14 text-base rounded-full font-medium transition-all group"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

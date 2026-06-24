@@ -1,5 +1,3 @@
-import { API_URL } from '@/lib/config'
-
 export const metadata = {
   title: 'Sign In',
 }
@@ -29,7 +27,7 @@ export default function LoginPage() {
           </p>
 
           <a
-            href={`${API_URL}/api/v1/auth/github`}
+            href="/api/auth/github"
             className="w-full inline-flex items-center justify-center gap-3 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-white font-medium px-4 py-3 rounded-lg transition-colors text-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

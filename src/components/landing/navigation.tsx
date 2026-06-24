@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
-import { API_URL } from '@/lib/config'
 
 const navLinks = [
   { name: 'Features', href: '#features' },
@@ -66,7 +65,7 @@ export function Navigation() {
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-4">
             <a
-              href={`${API_URL}/api/v1/auth/github`}
+              href="/api/auth/github"
               className={`text-zinc-500 hover:text-zinc-900 transition-colors ${
                 isScrolled ? 'text-xs' : 'text-sm'
               }`}
@@ -74,7 +73,7 @@ export function Navigation() {
               Sign in
             </a>
             <a
-              href={`${API_URL}/api/v1/auth/github`}
+              href="/api/auth/github"
               className={`bg-zinc-900 hover:bg-zinc-700 text-white rounded-full font-medium transition-all duration-300 ${
                 isScrolled ? 'px-4 py-1.5 text-xs' : 'px-5 py-2 text-sm'
               }`}
@@ -109,13 +108,13 @@ export function Navigation() {
               ))}
               <div className="flex gap-3 pt-4 border-t border-zinc-100">
                 <a
-                  href={`${API_URL}/api/v1/auth/github`}
+                  href="/api/auth/github"
                   className="flex-1 text-center border border-zinc-200 rounded-full py-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
                 >
                   Sign in
                 </a>
                 <a
-                  href={`${API_URL}/api/v1/auth/github`}
+                  href="/api/auth/github"
                   className="flex-1 text-center bg-zinc-900 text-white rounded-full py-2.5 text-sm font-medium"
                 >
                   Connect GitHub
