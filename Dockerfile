@@ -1,5 +1,5 @@
 # Stage 1: Install dependencies
-FROM node:20-alpine AS deps
+FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 
 # Copy package files — use install if no lockfile exists yet
@@ -8,7 +8,7 @@ COPY package.json package-lock.json* ./
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Stage 2: Build the application
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 # Copy installed dependencies from deps stage
@@ -28,7 +28,7 @@ ENV NEXT_PUBLIC_API_URL ""
 RUN npm run build
 
 # Stage 3: Production runtime
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
