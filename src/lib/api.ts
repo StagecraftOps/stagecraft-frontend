@@ -41,9 +41,8 @@ export async function fetchOrgs(): Promise<Organization[]> {
   return data.organizations
 }
 
-export async function addOrg(org_login: string): Promise<Organization> {
-  const { data } = await api.post<Organization>('/api/v1/orgs/', { login: org_login })
-  return data
+export function getOrgInstallUrl(): string {
+  return `${API_URL}/api/v1/orgs/install`
 }
 
 export async function removeOrg(org_login: string): Promise<void> {
