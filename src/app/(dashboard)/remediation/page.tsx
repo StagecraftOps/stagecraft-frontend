@@ -92,9 +92,12 @@ export default function RemediationPage() {
                   className="hover:bg-zinc-50 transition-colors"
                 >
                   <td className="py-3.5 px-4">
-                    <span className="text-sm font-medium text-zinc-700">
+                    <Link
+                      href={`/remediation/${rem.id}`}
+                      className="text-sm font-medium text-zinc-700 hover:text-amber-700 transition-colors"
+                    >
                       {rem.repo_name}
-                    </span>
+                    </Link>
                   </td>
                   <td className="py-3.5 px-4">
                     <span className="text-xs font-mono text-zinc-500 bg-zinc-50 border border-zinc-100 px-2 py-0.5 rounded">
@@ -106,7 +109,9 @@ export default function RemediationPage() {
                       href={`/remediation/${rem.id}`}
                       className="text-sm text-zinc-600 hover:text-amber-700 transition-colors"
                     >
-                      {truncate(rem.root_cause, 80)}
+                      {rem.root_cause ? truncate(rem.root_cause, 80) : (
+                        <span className="text-zinc-400 italic">View details</span>
+                      )}
                     </Link>
                   </td>
                   <td className="py-3.5 px-4">
