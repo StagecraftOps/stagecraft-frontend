@@ -21,6 +21,11 @@ interface ChatApiResponse {
   error?: string | null
 }
 
+interface HistoryMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 const SUGGESTIONS = [
   'What are the most common root causes of our failures?',
   'How do we usually fix dependency version errors?',
@@ -87,13 +92,8 @@ function DataTable({ data }: { data: Record<string, unknown>[] }) {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: "Hi! I'm your AI pipeline assistant. Ask me anything about your CI/CD data — failures, trends, remediations, and more.",
-    },
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -102,6 +102,25 @@ export default function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Load persistent history on mount
+  useEffect(() => {
+    api.get<{ messages: HistoryMessage[] }>('/api/v1/chat/history')
+      .then(({ data }) => {
+        if (data.messages.length > 0) {
+          const loaded: ChatMessage[] = data.messages.map((m, i) => ({
+            id: `history-${i}`,
+            role: m.role,
+            content: m.content,
+          }))
+          setMessages(loaded)
+        }
+      })
+      .catch(() => {/* silently fall through to welcome message */})
+      .finally(() => setHistoryLoaded(true))
+  }, [])
+
+  const showWelcome = historyLoaded && messages.length === 0
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return
@@ -161,6 +180,23 @@ export default function ChatPage() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        {showWelcome && (
+          <div className="flex gap-3 justify-start">
+            <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot size={13} className="text-amber-400" />
+            </div>
+            <div className="max-w-[75%]">
+              <div className="rounded-xl px-4 py-2.5 text-sm leading-relaxed bg-zinc-800 text-zinc-100 border border-zinc-700">
+                Hi! I&apos;m your AI pipeline assistant. Ask me anything about your CI/CD data — failures, trends, remediations, and more.
+              </div>
+            </div>
+          </div>
+        )}
+        {!historyLoaded && (
+          <div className="flex justify-center py-8">
+            <Loader2 size={18} className="animate-spin text-zinc-600" />
+          </div>
+        )}
         {messages.map((msg) => (
           <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
@@ -196,8 +232,8 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestions (only shown when no user messages yet) */}
-      {messages.length === 1 && (
+      {/* Suggestions (only shown when no messages yet) */}
+      {showWelcome && (
         <div className="px-6 pb-2">
           <p className="text-xs text-zinc-500 mb-2">Try asking:</p>
           <div className="flex flex-wrap gap-2">
