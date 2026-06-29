@@ -21,11 +21,6 @@ interface ChatApiResponse {
   error?: string | null
 }
 
-interface HistoryMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
-
 const SUGGESTIONS = [
   'What are the most common root causes of our failures?',
   'How do we usually fix dependency version errors?',
@@ -93,7 +88,6 @@ function DataTable({ data }: { data: Record<string, unknown>[] }) {
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [historyLoaded, setHistoryLoaded] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -103,24 +97,7 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Load persistent history on mount
-  useEffect(() => {
-    api.get<{ messages: HistoryMessage[] }>('/api/v1/chat/history')
-      .then(({ data }) => {
-        if (data.messages.length > 0) {
-          const loaded: ChatMessage[] = data.messages.map((m, i) => ({
-            id: `history-${i}`,
-            role: m.role,
-            content: m.content,
-          }))
-          setMessages(loaded)
-        }
-      })
-      .catch(() => {/* silently fall through to welcome message */})
-      .finally(() => setHistoryLoaded(true))
-  }, [])
-
-  const showWelcome = historyLoaded && messages.length === 0
+  const showWelcome = messages.length === 0
 
   async function sendMessage(text: string) {
     if (!text.trim() || loading) return
@@ -190,11 +167,6 @@ export default function ChatPage() {
                 Hi! I&apos;m your AI pipeline assistant. Ask me anything about your CI/CD data — failures, trends, remediations, and more.
               </div>
             </div>
-          </div>
-        )}
-        {!historyLoaded && (
-          <div className="flex justify-center py-8">
-            <Loader2 size={18} className="animate-spin text-zinc-600" />
           </div>
         )}
         {messages.map((msg) => (
