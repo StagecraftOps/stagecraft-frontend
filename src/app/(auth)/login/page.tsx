@@ -12,7 +12,7 @@ export default function LoginPage() {
             className="text-zinc-900 mb-3"
             style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '2.5rem' }}
           >
-            aGorA
+            Stagecraft
           </span>
           <p className="text-sm text-zinc-500">GitHub Actions intelligence</p>
         </div>
@@ -37,14 +37,14 @@ export default function LoginPage() {
           </a>
 
           <p className="text-xs text-zinc-400 text-center mt-5 leading-relaxed">
-            aGorA reads your organisation&apos;s GitHub Actions workflows and
+            Stagecraft reads your organisation&apos;s GitHub Actions workflows and
             suggests fixes for failing pipelines. No code is committed without
             your review.
           </p>
         </div>
 
         <p className="text-center text-xs text-zinc-400 mt-6">
-          &copy; {new Date().getFullYear()} aGorA
+          &copy; {new Date().getFullYear()} Stagecraft
         </p>
       </div>
     </div>
