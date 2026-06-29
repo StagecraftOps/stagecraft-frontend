@@ -22,11 +22,11 @@ interface ChatApiResponse {
 }
 
 const SUGGESTIONS = [
-  'What are the most common root causes of our failures?',
-  'How do we usually fix dependency version errors?',
-  'Summarize the auth failures and their fixes',
-  'What kinds of issues affect agora-api the most?',
-  'Have we seen this kind of build error before?',
+  'Why is PACE-Stagecraft-api failing the most?',
+  'What dependency version issues have we seen and how were they fixed?',
+  'Summarize the auth failures and what caused them',
+  'Have we had any permission errors in infrastructure pipelines?',
+  'What kinds of build errors has PACE-Stagecraft-mcp-github had?',
 ]
 
 function SqlBlock({ sql }: { sql: string }) {
