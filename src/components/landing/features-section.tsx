@@ -28,7 +28,7 @@ const features = [
     number: '04',
     title: 'One-Click PR',
     description:
-      'Happy with the suggestion? Click "Raise PR" and aGorA creates the branch, commits the fix, and opens a pull request — using your own GitHub token, no write-scope stored on our side.',
+      'Happy with the suggestion? Click "Raise PR" and Stagecraft creates the branch, commits the fix, and opens a pull request — using your own GitHub token, no write-scope stored on our side.',
     visual: 'pr',
   },
 ]

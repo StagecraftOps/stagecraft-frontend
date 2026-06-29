@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'aGorA',
-    template: '%s | aGorA',
+    default: 'Stagecraft',
+    template: '%s | Stagecraft',
   },
   description:
     'Unified GitHub Actions workflow visibility with AI-powered failure analysis.',

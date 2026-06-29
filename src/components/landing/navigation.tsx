@@ -44,7 +44,7 @@ export function Navigation() {
                 isScrolled ? 'text-xl' : 'text-2xl'
               }`}
             >
-              aGorA
+              Stagecraft
             </span>
           </a>
 
