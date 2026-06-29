@@ -40,7 +40,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Connected Organizations</CardTitle>
           <CardDescription>
-            Organizations tracked by PipelineIQ via the aGorA-Ops GitHub App.
+            Organizations tracked by PipelineIQ via the Stagecraft GitHub App.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,7 +104,7 @@ export default function SettingsPage() {
 
           <div className="mt-4 pt-4 border-t border-zinc-100">
             <p className="text-xs text-zinc-500 mb-3">
-              To connect a new organization, install the aGorA-Ops GitHub App on it.
+              To connect a new organization, install the Stagecraft GitHub App on it.
               Once installed, it will appear here automatically.
             </p>
             <Button variant="primary" onClick={handleInstall} className="flex items-center gap-2">

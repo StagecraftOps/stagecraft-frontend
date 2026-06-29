@@ -7,10 +7,10 @@ const steps = [
     number: 'I',
     title: 'Connect your org',
     description:
-      'Sign in with GitHub OAuth and connect your organisation. aGorA installs a webhook that streams every workflow_run event — queued, running, completed — directly to your dashboard.',
+      'Sign in with GitHub OAuth and connect your organisation. Stagecraft installs a webhook that streams every workflow_run event — queued, running, completed — directly to your dashboard.',
     code: `# 1. Authenticate via GitHub OAuth
 # 2. Connect your org in Settings
-# 3. aGorA installs a webhook:
+# 3. Stagecraft installs a webhook:
 
 POST /orgs/{org}/hooks
 {
@@ -182,7 +182,7 @@ export function HowItWorksSection() {
               </div>
               <div className="px-5 py-3.5 border-t border-white/10 flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-code text-white/35">aGorA ready</span>
+                <span className="text-xs font-code text-white/35">Stagecraft ready</span>
               </div>
             </div>
           </div>
