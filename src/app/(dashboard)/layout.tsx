@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/layout/sidebar'
+import { AUTH_COOKIE_NAME } from '@/lib/config'
 import type { User } from '@/types'
 
 const SERVER_API_URL =
@@ -11,11 +12,11 @@ const SERVER_API_URL =
 async function getUser(): Promise<User | null> {
   try {
     const cookieStore = cookies()
-    const token = cookieStore.get('agora_token')
+    const token = cookieStore.get(AUTH_COOKIE_NAME)
     if (!token) return null
 
     const res = await fetch(`${SERVER_API_URL}/api/v1/auth/me`, {
-      headers: { Cookie: `agora_token=${token.value}` },
+      headers: { Cookie: `${AUTH_COOKIE_NAME}=${token.value}` },
       cache: 'no-store',
     })
 

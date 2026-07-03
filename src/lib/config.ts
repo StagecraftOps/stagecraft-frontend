@@ -12,3 +12,6 @@ export const WS_URL = (() => {
   const base = API_URL.replace(/^http/, 'ws')
   return `${base}/ws`
 })()
+
+// Must match AUTH_COOKIE_NAME in stagecraft-api/app/api/deps.py
+export const AUTH_COOKIE_NAME = 'stagecraft_token'
