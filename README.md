@@ -1,8 +1,8 @@
-# agora-frontend
+# stagecraft-frontend
 
-Next.js 14 App Router dashboard for aGorA. GitHub OAuth login, unified workflow runs view, AI-suggested fixes with one-click PR.
+Next.js 14 App Router dashboard for Stagecraft. GitHub OAuth login, unified workflow runs view, AI-suggested fixes with one-click PR.
 
-**Port**: 3000 | **Part of**: [aGora-Ops](https://github.com/aGora-Ops)
+**Port**: 3000 | **Part of**: [Stagecraft-Ops](https://github.com/Stagecraft-Ops)
 
 ## Quick start
 

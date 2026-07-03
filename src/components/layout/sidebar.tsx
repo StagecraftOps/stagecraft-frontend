@@ -6,8 +6,15 @@ import Image from 'next/image'
 import {
   LayoutDashboard,
   GitBranch,
+  Workflow,
   ListChecks,
   Wrench,
+  Gauge,
+  Layers,
+  GitPullRequest,
+  ShieldCheck,
+  Zap,
+  Network,
   BarChart2,
   MessageSquare,
   Settings,
@@ -29,6 +36,31 @@ const navItems = [
     icon: GitBranch,
   },
   {
+    label: 'Dependency Graph',
+    href: '/dependency-graph',
+    icon: Workflow,
+  },
+  {
+    label: 'Standardization',
+    href: '/standardization',
+    icon: Layers,
+  },
+  {
+    label: 'Governance',
+    href: '/governance',
+    icon: ShieldCheck,
+  },
+  {
+    label: 'Optimization',
+    href: '/optimization',
+    icon: Zap,
+  },
+  {
+    label: 'Knowledge Graph',
+    href: '/knowledge-graph',
+    icon: Network,
+  },
+  {
     label: 'Runs',
     href: '/runs',
     icon: ListChecks,
@@ -39,9 +71,19 @@ const navItems = [
     icon: Wrench,
   },
   {
+    label: 'Peer Review',
+    href: '/pr-reviews',
+    icon: GitPullRequest,
+  },
+  {
     label: 'Analytics',
     href: '/analytics',
     icon: BarChart2,
+  },
+  {
+    label: 'Performance',
+    href: '/performance',
+    icon: Gauge,
   },
   {
     label: 'Pipeline Chat',

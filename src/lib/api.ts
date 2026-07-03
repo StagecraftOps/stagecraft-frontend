@@ -6,6 +6,21 @@ import type {
   WorkflowRun,
   Remediation,
   AnalyticsData,
+  Graph,
+  GraphDetail,
+  JobRunData,
+  CriticalPathData,
+  LongestJobEntry,
+  LongestWorkflowEntry,
+  WorkflowTemplate,
+  TemplateDiff,
+  PatternCluster,
+  PRReview,
+  GovernanceDocument,
+  GovernanceDocType,
+  ComplianceFinding,
+  OptimizationRecommendation,
+  SimulationRun,
 } from '@/types'
 import { API_URL } from '@/lib/config'
 
@@ -167,6 +182,192 @@ export async function getSimilarRemediations(
   const { data } = await api.get<Remediation[]>(
     `/api/v1/remediations/${remediationId}/similar`,
     { params: { limit } }
+  )
+  return data
+}
+
+// ── Dependency graph (FR-1) ───────────────────────────────────────────────
+
+export async function buildDependencyGraph(
+  org: string,
+  repo: string,
+  ref = 'main'
+): Promise<Graph> {
+  const { data } = await api.post<Graph>(
+    `/api/v1/orgs/${org}/repos/${repo}/dependency-graph/build`,
+    { ref }
+  )
+  return data
+}
+
+export async function fetchDependencyGraph(org: string, repo: string): Promise<GraphDetail> {
+  const { data } = await api.get<GraphDetail>(`/api/v1/orgs/${org}/repos/${repo}/dependency-graph`)
+  return data
+}
+
+export async function fetchDependencyGraphHistory(org: string, repo: string): Promise<Graph[]> {
+  const { data } = await api.get<{ graphs: Graph[]; total: number }>(
+    `/api/v1/orgs/${org}/repos/${repo}/dependency-graph/history`
+  )
+  return data.graphs
+}
+
+export async function fetchKnowledgeGraph(org: string): Promise<GraphDetail> {
+  const { data } = await api.get<GraphDetail>(`/api/v1/orgs/${org}/knowledge-graph`)
+  return data
+}
+
+export async function buildKnowledgeGraph(org: string): Promise<void> {
+  await api.post(`/api/v1/orgs/${org}/knowledge-graph/build`)
+}
+
+// ── Runtime monitoring (FR-2) ─────────────────────────────────────────────
+
+export async function fetchRunJobs(runId: string): Promise<JobRunData[]> {
+  const { data } = await api.get<{ jobs: JobRunData[] }>(`/api/v1/runs/${runId}/jobs`)
+  return data.jobs
+}
+
+export async function fetchRunCriticalPath(runId: string): Promise<CriticalPathData | null> {
+  try {
+    const { data } = await api.get<CriticalPathData>(`/api/v1/runs/${runId}/critical-path`)
+    return data
+  } catch {
+    return null
+  }
+}
+
+export async function fetchLongestJobs(org: string, limit = 10): Promise<LongestJobEntry[]> {
+  const { data } = await api.get<LongestJobEntry[]>(
+    `/api/v1/orgs/${org}/performance/longest-jobs`,
+    { params: { limit } }
+  )
+  return data
+}
+
+export async function fetchLongestWorkflows(org: string, limit = 10): Promise<LongestWorkflowEntry[]> {
+  const { data } = await api.get<LongestWorkflowEntry[]>(
+    `/api/v1/orgs/${org}/performance/longest-workflows`,
+    { params: { limit } }
+  )
+  return data
+}
+
+// ── Standardization (FR-3/FR-4) ───────────────────────────────────────────
+
+export async function fetchTemplates(org: string): Promise<WorkflowTemplate[]> {
+  const { data } = await api.get<{ templates: WorkflowTemplate[] }>(`/api/v1/orgs/${org}/templates`)
+  return data.templates
+}
+
+export async function createTemplate(
+  org: string,
+  body: { name: string; description?: string; template_yaml: string }
+): Promise<WorkflowTemplate> {
+  const { data } = await api.post<WorkflowTemplate>(`/api/v1/orgs/${org}/templates`, body)
+  return data
+}
+
+export async function deactivateTemplate(org: string, templateId: string): Promise<void> {
+  await api.delete(`/api/v1/orgs/${org}/templates/${templateId}`)
+}
+
+export async function analyzeStandardization(org: string, repo: string, ref = 'main'): Promise<void> {
+  await api.post(`/api/v1/orgs/${org}/repos/${repo}/standardization/analyze`, { ref })
+}
+
+export async function fetchTemplateDiffs(org: string, repo: string): Promise<TemplateDiff[]> {
+  const { data } = await api.get<{ diffs: TemplateDiff[] }>(
+    `/api/v1/orgs/${org}/repos/${repo}/standardization/diffs`
+  )
+  return data.diffs
+}
+
+export async function fetchPatternClusters(org: string): Promise<PatternCluster[]> {
+  const { data } = await api.get<{ patterns: PatternCluster[] }>(
+    `/api/v1/orgs/${org}/standardization/patterns`
+  )
+  return data.patterns
+}
+
+// ── Peer Review Agent (FR-12a) ────────────────────────────────────────────
+
+export async function fetchPRReviews(): Promise<PRReview[]> {
+  const { data } = await api.get<{ reviews: PRReview[]; total: number }>('/api/v1/pr-reviews/')
+  return data.reviews
+}
+
+export async function fetchPRReview(id: string): Promise<PRReview> {
+  const { data } = await api.get<PRReview>(`/api/v1/pr-reviews/${id}`)
+  return data
+}
+
+// ── Governance & compliance (FR-5/FR-6) ───────────────────────────────────
+
+export async function fetchGovernanceDocuments(org: string): Promise<GovernanceDocument[]> {
+  const { data } = await api.get<{ documents: GovernanceDocument[] }>(`/api/v1/orgs/${org}/governance/documents`)
+  return data.documents
+}
+
+export async function uploadGovernanceDocument(
+  org: string,
+  docType: GovernanceDocType,
+  title: string,
+  file: File
+): Promise<GovernanceDocument> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const { data } = await api.post<GovernanceDocument>(
+    `/api/v1/orgs/${org}/governance/documents`,
+    formData,
+    { params: { doc_type: docType, title }, headers: { 'Content-Type': 'multipart/form-data' } }
+  )
+  return data
+}
+
+export async function analyzeGovernance(
+  org: string,
+  repo: string,
+  body: { mode: 'framework' | 'document'; ref?: string; framework?: string; document_id?: string }
+): Promise<void> {
+  await api.post(`/api/v1/orgs/${org}/repos/${repo}/governance/analyze`, { ref: 'main', ...body })
+}
+
+export async function fetchComplianceFindings(org: string, repo: string): Promise<ComplianceFinding[]> {
+  const { data } = await api.get<{ findings: ComplianceFinding[] }>(
+    `/api/v1/orgs/${org}/repos/${repo}/governance/findings`
+  )
+  return data.findings
+}
+
+// ── Performance optimization (FR-7/FR-8/FR-9) ─────────────────────────────
+
+export async function analyzeOptimization(org: string, repo: string, workflowFile: string, ref = 'main'): Promise<void> {
+  await api.post(`/api/v1/orgs/${org}/repos/${repo}/optimization/analyze`, { workflow_file: workflowFile, ref })
+}
+
+export async function fetchOptimizationRecommendations(org: string, repo: string): Promise<OptimizationRecommendation[]> {
+  const { data } = await api.get<{ recommendations: OptimizationRecommendation[] }>(
+    `/api/v1/orgs/${org}/repos/${repo}/optimization/recommendations`
+  )
+  return data.recommendations
+}
+
+export async function fetchSimulation(recommendationId: string): Promise<SimulationRun> {
+  const { data } = await api.get<SimulationRun>(`/api/v1/optimization/recommendations/${recommendationId}/simulation`)
+  return data
+}
+
+export async function acceptRecommendation(recommendationId: string): Promise<OptimizationRecommendation> {
+  const { data } = await api.post<OptimizationRecommendation>(
+    `/api/v1/optimization/recommendations/${recommendationId}/accept`
+  )
+  return data
+}
+
+export async function rejectRecommendation(recommendationId: string): Promise<OptimizationRecommendation> {
+  const { data } = await api.post<OptimizationRecommendation>(
+    `/api/v1/optimization/recommendations/${recommendationId}/reject`
   )
   return data
 }

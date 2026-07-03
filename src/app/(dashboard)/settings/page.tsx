@@ -40,7 +40,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Connected Organizations</CardTitle>
           <CardDescription>
-            Organizations tracked by PipelineIQ via the Stagecraft GitHub App.
+            Organizations tracked by Stagecraft via the Stagecraft GitHub App.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -16,7 +16,7 @@ POST /orgs/{org}/hooks
 {
   "events": ["workflow_run"],
   "config": {
-    "url": "https://agora.app/webhooks/github"
+    "url": "https://stagecraft.app/webhooks/github"
   }
 }
 
