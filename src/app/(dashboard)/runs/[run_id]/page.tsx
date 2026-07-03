@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { ArrowLeft, ExternalLink, Bot, AlertCircle, GitBranch, Clock, Hash } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { fetchRun, fetchRemediations, fetchRunLogs } from '@/lib/api'
+import { fetchRun, fetchRemediations, fetchRunLogs, fetchRunJobs, fetchRunCriticalPath } from '@/lib/api'
 import { LogViewer } from '@/components/workflows/log-viewer'
+import { JobTimeline } from '@/components/workflows/job-timeline'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -30,6 +31,18 @@ export default function RunDetailPage() {
   const relatedRemediation = remediations.find(
     (r) => run && r.workflow_run_id === run.id
   )
+
+  const { data: jobs = [] } = useQuery({
+    queryKey: ['run-jobs', runId],
+    queryFn: () => fetchRunJobs(runId),
+    enabled: Boolean(runId),
+  })
+
+  const { data: criticalPath = null } = useQuery({
+    queryKey: ['run-critical-path', runId],
+    queryFn: () => fetchRunCriticalPath(runId),
+    enabled: Boolean(runId),
+  })
 
   const [showLogs, setShowLogs] = useState(false)
   const {
@@ -188,6 +201,18 @@ export default function RunDetailPage() {
               </dl>
             </CardContent>
           </Card>
+
+          {/* Job timeline (FR-2 runtime monitoring) */}
+          {jobs.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Job Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <JobTimeline jobs={jobs} criticalPath={criticalPath} />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Workflow Logs */}
           <Card>
