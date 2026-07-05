@@ -17,6 +17,7 @@ import {
 import dagre from '@dagrejs/dagre'
 import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
+import { Maximize2, Minimize2 } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import type { GraphNodeData, GraphEdgeData, GraphEdgeConfidence } from '@/types'
 
@@ -82,6 +83,7 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [query, setQuery] = useState('')
   const [focusId, setFocusId] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState(false)
   const { getNodes, fitView } = useReactFlow()
 
   const typeCounts = useMemo(() => {
@@ -157,7 +159,17 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
   useEffect(() => {
     const t = setTimeout(() => fitView({ duration: 300, padding: 0.15 }), 60)
     return () => clearTimeout(t)
-  }, [hidden, focusId, fitView])
+  }, [hidden, focusId, expanded, fitView])
+
+  // Esc exits the expanded (landscape) view.
+  useEffect(() => {
+    if (!expanded) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpanded(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [expanded])
 
   const onNodeClick: NodeMouseHandler = useCallback((_, node) => setFocusId(node.id), [])
 
@@ -213,7 +225,13 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
     'rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800'
 
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className={
+        expanded
+          ? 'fixed inset-0 z-50 flex flex-col gap-3 bg-white p-4 dark:bg-zinc-950'
+          : 'flex flex-col gap-3'
+      }
+    >
       <div className="flex flex-wrap items-center gap-2">
         <input
           value={query}
@@ -227,6 +245,10 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
           </button>
         )}
         <div className="ml-auto flex gap-2">
+          <button onClick={() => setExpanded((v) => !v)} className={btn} title={expanded ? 'Exit expanded view (Esc)' : 'Expand to full screen'}>
+            {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            {expanded ? 'Exit fullscreen' : 'Expand'}
+          </button>
           <button onClick={() => download('png')} className={btn}>
             Export PNG
           </button>
@@ -260,7 +282,13 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
         })}
       </div>
 
-      <div className="h-[640px] w-full rounded-lg border border-zinc-200 dark:border-zinc-800">
+      <div
+        className={
+          expanded
+            ? 'w-full flex-1 rounded-lg border border-zinc-200 dark:border-zinc-800'
+            : 'h-[calc(100vh-260px)] min-h-[560px] w-full rounded-lg border border-zinc-200 dark:border-zinc-800'
+        }
+      >
         <ReactFlow
           nodes={flowNodes}
           edges={flowEdges}
