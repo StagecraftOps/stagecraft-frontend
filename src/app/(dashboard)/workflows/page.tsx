@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Search, AlertCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { WorkflowCard } from '@/components/workflows/workflow-card'
 import { SkeletonCard } from '@/components/ui/skeleton'
-import { fetchOrgs, fetchWorkflowsByOrg } from '@/lib/api'
+import { PageHeader } from '@/components/ui/page-header'
+import { useOrg } from '@/lib/org-context'
+import { fetchWorkflowsByOrg } from '@/lib/api'
 import type { Workflow } from '@/types'
 
 type StatusFilter = 'all' | 'active' | 'failed' | 'disabled'
@@ -20,20 +22,7 @@ const filterButtons: { label: string; value: StatusFilter }[] = [
 export default function WorkflowsPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [selectedOrg, setSelectedOrg] = useState<string>('')
-
-  const { data: orgs = [] } = useQuery({
-    queryKey: ['orgs'],
-    queryFn: fetchOrgs,
-  })
-
-  useEffect(() => {
-    if (orgs.length > 0 && !selectedOrg) {
-      setSelectedOrg(orgs[0].login)
-    }
-  }, [orgs, selectedOrg])
-
-  const currentOrg = selectedOrg || orgs[0]?.login || ''
+  const { currentOrg } = useOrg()
 
   const { data: workflows = [], isLoading, error } = useQuery({
     queryKey: ['workflows', currentOrg],
@@ -71,13 +60,11 @@ export default function WorkflowsPage() {
 
   return (
     <div className="p-8">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-800">Workflows</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          All GitHub Actions workflows across your organization.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Pipelines"
+        title="Workflows"
+        description="All GitHub Actions workflows across your organization."
+      />
 
       {/* Toolbar */}
       <div className="flex items-center gap-3 flex-wrap mb-6">
@@ -112,21 +99,6 @@ export default function WorkflowsPage() {
             </button>
           ))}
         </div>
-
-        {/* Org selector */}
-        {orgs.length > 1 && (
-          <select
-            value={currentOrg}
-            onChange={(e) => setSelectedOrg(e.target.value)}
-            className="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          >
-            {orgs.map((org) => (
-              <option key={org.login} value={org.login}>
-                {org.name || org.login}
-              </option>
-            ))}
-          </select>
-        )}
 
         <span className="text-sm text-zinc-400 ml-auto">
           {filtered.length} workflow{filtered.length !== 1 ? 's' : ''}

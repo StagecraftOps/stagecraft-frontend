@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchOrgs, removeOrg, getOrgInstallUrl } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { PageHeader } from '@/components/ui/page-header'
 import { API_URL } from '@/lib/config'
 
 export default function SettingsPage() {
@@ -29,12 +30,10 @@ export default function SettingsPage() {
 
   return (
     <div className="p-8 max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-800">Settings</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Manage your connected GitHub organizations.
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage your connected GitHub organizations."
+      />
 
       <Card>
         <CardHeader>
