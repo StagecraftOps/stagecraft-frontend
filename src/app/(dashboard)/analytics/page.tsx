@@ -45,16 +45,28 @@ function CustomTooltip({
   )
 }
 
+function formatDuration(seconds: number | null | undefined): string {
+  if (seconds == null) return '—'
+  if (seconds < 60) return `${Math.round(seconds)}s`
+  const m = Math.floor(seconds / 60)
+  const s = Math.round(seconds % 60)
+  if (m < 60) return s ? `${m}m ${s}s` : `${m}m`
+  const h = Math.floor(m / 60)
+  return `${h}h ${m % 60}m`
+}
+
 export default function AnalyticsPage() {
   const { data: analytics, isLoading, error } = useAnalytics()
 
-  const successRateDisplay = analytics
-    ? `${(analytics.success_rate * 100).toFixed(1)}%`
-    : '—'
+  // Success/failure as a share of COMPLETED runs (excludes still-running and
+  // cancelled/skipped), so the three shares actually add up and read honestly.
+  const completed = analytics?.completed_runs ?? 0
+  const successPct = completed ? (analytics!.success_count / completed) * 100 : 0
+  const failurePct = completed ? (analytics!.failure_count / completed) * 100 : 0
+  const otherPct = completed ? (analytics!.other_count / completed) * 100 : 0
 
-  const failureRateDisplay = analytics
-    ? `${(analytics.failure_rate * 100).toFixed(1)}%`
-    : '—'
+  const successRateDisplay = analytics && completed ? `${successPct.toFixed(1)}%` : '—'
+  const failureRateDisplay = analytics && completed ? `${failurePct.toFixed(1)}%` : '—'
 
   return (
     <div className="p-8">
@@ -231,10 +243,36 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* MTTR placeholder */}
+      {/* Run outcome breakdown — honest 3-way split of completed runs */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Run Outcomes ({completed.toLocaleString()} completed)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {completed === 0 ? (
+            <p className="text-sm text-zinc-400 py-2">No completed runs yet.</p>
+          ) : (
+            <>
+              <div className="flex h-3 w-full overflow-hidden rounded-full bg-zinc-100">
+                <div className="bg-emerald-500" style={{ width: `${successPct}%` }} />
+                <div className="bg-rose-500" style={{ width: `${failurePct}%` }} />
+                <div className="bg-zinc-300" style={{ width: `${otherPct}%` }} />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-6 text-xs text-zinc-500">
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />Success {successPct.toFixed(1)}% ({analytics?.success_count ?? 0})</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" />Failure {failurePct.toFixed(1)}% ({analytics?.failure_count ?? 0})</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-zinc-300" />Other {otherPct.toFixed(1)}% ({analytics?.other_count ?? 0})</span>
+              </div>
+              <p className="mt-2 text-[11px] text-zinc-400">&ldquo;Other&rdquo; = cancelled, skipped, timed-out or startup-failure runs.</p>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* AI remediation timing — real, computed metrics */}
       <Card>
         <CardHeader>
-          <CardTitle>Mean Time to Remediate (MTTR)</CardTitle>
+          <CardTitle>AI Remediation</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-8 py-4">
@@ -242,25 +280,21 @@ export default function AnalyticsPage() {
               <p className="text-3xl font-bold text-zinc-800 tabular-nums">
                 {analytics?.remediations_raised ?? 0}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">Total AI Remediations</p>
+              <p className="text-xs text-zinc-500 mt-1">PRs raised</p>
             </div>
             <div className="w-px h-12 bg-zinc-100" />
             <div className="text-center">
               <p className="text-3xl font-bold text-zinc-800 tabular-nums">
-                {analytics
-                  ? analytics.remediations_raised > 0
-                    ? `~5m`
-                    : '—'
-                  : '—'}
+                {formatDuration(analytics?.avg_analysis_seconds)}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">Avg. time to PR</p>
+              <p className="text-xs text-zinc-500 mt-1">Avg. time to fix suggestion</p>
             </div>
             <div className="w-px h-12 bg-zinc-100" />
             <div className="text-center">
-              <p className="text-3xl font-bold text-emerald-600 tabular-nums">
-                {successRateDisplay}
+              <p className="text-3xl font-bold text-zinc-800 tabular-nums">
+                {formatDuration(analytics?.avg_time_to_pr_seconds)}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">Overall success rate</p>
+              <p className="text-xs text-zinc-500 mt-1">Avg. time to PR</p>
             </div>
           </div>
         </CardContent>

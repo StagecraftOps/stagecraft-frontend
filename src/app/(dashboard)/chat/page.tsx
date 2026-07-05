@@ -21,12 +21,15 @@ interface ChatApiResponse {
   error?: string | null
 }
 
+// A mix of both engine paths: the first two are COUNT/ranking questions that
+// hit the fast SQL analytics path; the rest are INVESTIGATE questions that run
+// the AI investigator over real run history.
 const SUGGESTIONS = [
-  'Why is PACE-Stagecraft-api failing the most?',
-  'What dependency version issues have we seen and how were they fixed?',
-  'Summarize the auth failures and what caused them',
-  'Have we had any permission errors in infrastructure pipelines?',
-  'What kinds of build errors has PACE-Stagecraft-mcp-github had?',
+  'Which repository has the most failures?',
+  'How many workflow runs failed in the last 7 days?',
+  'What dependency-version issues have we seen and how were they fixed?',
+  'Why do the listing-service CI runs keep failing?',
+  'Summarize the most common failure categories across our pipelines.',
 ]
 
 function SqlBlock({ sql }: { sql: string }) {
