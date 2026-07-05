@@ -5,6 +5,7 @@ import { GitPullRequest, ExternalLink, AlertCircle } from 'lucide-react'
 import { fetchPRReviews } from '@/lib/api'
 import { Badge } from '@/components/ui/badge'
 import { SkeletonRow } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
 import { formatRelativeTime, truncate } from '@/lib/utils'
 
 function riskColor(score: number | null): string {
@@ -22,12 +23,11 @@ export default function PRReviewsPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100">Peer Review</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          AI-reviewed pull requests touching CI/CD workflows, powered by AWS Bedrock.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="AI Agents"
+        title="Peer Review"
+        description="AI-reviewed pull requests touching CI/CD workflows, powered by AWS Bedrock."
+      />
 
       {error && (
         <div className="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
