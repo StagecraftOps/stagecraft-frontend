@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   },
   description:
     'Unified GitHub Actions workflow visibility with AI-powered failure analysis.',
-  icons: {
-    icon: '/favicon.ico',
-  },
+  // No explicit icons entry — src/app/icon.png is Next's file-based
+  // convention and gets auto-detected, serving the right <link rel="icon">
+  // tag without any metadata config.
 }
 
 export default function RootLayout({
