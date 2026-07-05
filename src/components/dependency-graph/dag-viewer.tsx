@@ -58,9 +58,12 @@ const EDGE_STYLE_BY_CONFIDENCE: Record<GraphEdgeConfidence, { strokeDasharray?: 
 function layoutWithDagre(nodes: Node[], edges: Edge[]): Node[] {
   const g = new dagre.graphlib.Graph()
   g.setDefaultEdgeLabel(() => ({}))
-  // Wider spacing than the default — with hundreds of nodes the graph is only
-  // legible once you filter/focus, and generous gaps keep the labels readable.
-  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 120 })
+  // rankdir 'TB' spreads same-rank nodes horizontally (side by side) and
+  // stacks ranks vertically — with a heavily-populated rank (e.g. hundreds
+  // of jobs under one workflow), that reads as a wide, landscape-shaped
+  // graph that suits a wide desktop screen, instead of 'LR' which would
+  // stack that same rank into one very tall, narrow column.
+  g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 120 })
 
   nodes.forEach((node) => g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
   edges.forEach((edge) => g.setEdge(edge.source, edge.target))
