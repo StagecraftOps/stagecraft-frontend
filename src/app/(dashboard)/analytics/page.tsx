@@ -17,6 +17,7 @@ import { useAnalytics } from '@/hooks/useAnalytics'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
 
 function CustomTooltip({
   active,
@@ -70,13 +71,11 @@ export default function AnalyticsPage() {
 
   return (
     <div className="p-8">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-800">Analytics</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Pipeline performance metrics and AI remediation insights.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Overview"
+        title="Analytics"
+        description="Pipeline performance metrics and AI remediation insights."
+      />
 
       {/* Error */}
       {error && (

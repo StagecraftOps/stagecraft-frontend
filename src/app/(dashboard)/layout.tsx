@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { Sidebar } from '@/components/layout/sidebar'
+import { DashboardShell } from '@/components/layout/dashboard-shell'
 import { AUTH_COOKIE_NAME } from '@/lib/config'
 import type { User } from '@/types'
 
@@ -38,12 +38,5 @@ export default async function DashboardLayout({
     redirect('/')
   }
 
-  return (
-    <div className="app-shell flex h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
-      <Sidebar user={user} />
-      <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
-        {children}
-      </main>
-    </div>
-  )
+  return <DashboardShell user={user}>{children}</DashboardShell>
 }
