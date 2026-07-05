@@ -103,6 +103,38 @@ function layoutWithDagre(nodes: Node[], edges: Edge[]): Node[] {
   })
 }
 
+// The collapsed workflow-to-workflow view is a hub-and-spoke graph (dozens
+// of workflows all calling the same handful of shared templates) — a
+// hierarchical layout (dagre) forces those many-to-few edges to sprawl
+// across the full width and cross everything in between, however it's
+// ranked. A circular layout (nodes evenly spaced on a ring, edges as
+// chords through the interior) is the standard fix for this graph shape:
+// hub nodes get short converging chords instead of long crossing lines.
+// The drilled (one workflow's job-dependency) view stays on dagre —
+// needs/needs_output between jobs is a genuine pipeline DAG, which a
+// hierarchical layout suits well.
+function layoutCircular(nodes: Node[]): Node[] {
+  const count = nodes.length
+  if (count === 0) return nodes
+  if (count === 1) return [{ ...nodes[0], position: { x: 0, y: 0 } }]
+
+  // Circumference must fit every node's width plus a gap, or adjacent
+  // nodes/labels overlap on the ring.
+  const circumference = count * (NODE_WIDTH + 40)
+  const radius = Math.max(300, circumference / (2 * Math.PI))
+
+  return nodes.map((node, i) => {
+    const angle = (2 * Math.PI * i) / count
+    return {
+      ...node,
+      position: {
+        x: radius * Math.cos(angle) - NODE_WIDTH / 2,
+        y: radius * Math.sin(angle) - NODE_HEIGHT / 2,
+      },
+    }
+  })
+}
+
 interface DagViewerProps {
   nodes: GraphNodeData[]
   edges: GraphEdgeData[]
@@ -376,21 +408,41 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
 
     const rfEdges: Edge[] = displayEdges
       .filter((e) => visible.has(e.source_node_id) && visible.has(e.target_node_id))
-      .map((e) => ({
-        id: e.id,
-        source: e.source_node_id,
-        target: e.target_node_id,
-        label:
-          e.count && e.count > 1
-            ? `${e.edge_type.replace(/_/g, ' ')} x${e.count}`
-            : e.edge_type.replace(/_/g, ' '),
-        animated: e.confidence === 'heuristic',
-        style: EDGE_STYLE_BY_CONFIDENCE[e.confidence],
-        labelStyle: { fontSize: 10, fill: '#64748b' },
-      }))
+      .map((e) => {
+        // At the collapsed level, "calls reusable" edges are the numerous,
+        // noisy ones (up to hundreds, converging on a handful of shared
+        // templates) -- a text label on every one of them clutters the view
+        // as much as the lines themselves. workflow_run_trigger edges are
+        // rare and meaningful, so those stay labeled.
+        const suppressLabel = e.edge_type === 'calls_reusable'
+        return {
+          id: e.id,
+          source: e.source_node_id,
+          target: e.target_node_id,
+          type: 'default', // explicit bezier curve -- distinguishes overlapping chords in the circular layout
+          label: suppressLabel
+            ? undefined
+            : e.count && e.count > 1
+              ? `${e.edge_type.replace(/_/g, ' ')} x${e.count}`
+              : e.edge_type.replace(/_/g, ' '),
+          animated: e.confidence === 'heuristic',
+          style: EDGE_STYLE_BY_CONFIDENCE[e.confidence],
+          labelStyle: { fontSize: 10, fill: '#64748b' },
+        }
+      })
 
-    return { flowNodes: layoutWithDagre(rfNodes, rfEdges), flowEdges: rfEdges }
-  }, [displayNodes, displayEdges, hidden, query, focusId, neighborsOf])
+    // Collapsed (workflow-to-workflow) view is hub-and-spoke -- circular
+    // layout suits it, including when focused down to one workflow + its
+    // callers/callees (still a small hub). Drilled (one workflow's job
+    // DAG) is a genuine pipeline hierarchy with real before/after direction
+    // (needs/needs_output) -- dagre's ranked layout communicates that flow
+    // better than a ring would, focused or not.
+    const useCircularLayout = !drilledWorkflowId
+    return {
+      flowNodes: useCircularLayout ? layoutCircular(rfNodes) : layoutWithDagre(rfNodes, rfEdges),
+      flowEdges: rfEdges,
+    }
+  }, [displayNodes, displayEdges, hidden, query, focusId, neighborsOf, drilledWorkflowId])
 
   // Re-fit the viewport whenever the visible set changes (filter/focus/
   // drill), so the user always lands on a framed view instead of an
