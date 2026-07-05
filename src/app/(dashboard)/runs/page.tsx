@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { AlertCircle, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { AlertCircle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { RunRow } from '@/components/workflows/run-row'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonRow } from '@/components/ui/skeleton'
-import { fetchOrgs, fetchRuns, fetchWorkflowsByOrg } from '@/lib/api'
+import { PageHeader } from '@/components/ui/page-header'
+import { useOrg } from '@/lib/org-context'
+import { fetchRuns, fetchWorkflowsByOrg } from '@/lib/api'
 
 const PAGE_SIZE = 25
 
@@ -14,25 +16,12 @@ type StatusFilter = 'all' | 'queued' | 'in_progress' | 'completed'
 type ConclusionFilter = 'all' | 'success' | 'failure' | 'cancelled'
 
 export default function RunsPage() {
-  const [selectedOrg, setSelectedOrg] = useState<string>('')
   const [selectedRepo, setSelectedRepo] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [conclusionFilter, setConclusionFilter] = useState<ConclusionFilter>('all')
-  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false)
   const [page, setPage] = useState(0)
 
-  const { data: orgs = [] } = useQuery({
-    queryKey: ['orgs'],
-    queryFn: fetchOrgs,
-  })
-
-  useEffect(() => {
-    if (orgs.length > 0 && !selectedOrg) {
-      setSelectedOrg(orgs[0].login)
-    }
-  }, [orgs, selectedOrg])
-
-  const currentOrg = selectedOrg || orgs[0]?.login || ''
+  const { orgs, currentOrg } = useOrg()
   const currentOrgObj = orgs.find((o) => o.login === currentOrg)
   const isSyncing = currentOrgObj?.sync_status === 'syncing' || currentOrgObj?.sync_status === 'pending'
 
@@ -76,47 +65,14 @@ export default function RunsPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-800">Workflow Runs</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Every workflow run across all repos in your organization — replacing the
-          per-repo Actions tab.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Pipelines"
+        title="Workflow Runs"
+        description="Every workflow run across all repos in your organization — replacing the per-repo Actions tab."
+      />
 
       {/* Toolbar */}
       <div className="flex items-center gap-3 flex-wrap mb-6">
-        {/* Org selector */}
-        {orgs.length > 1 && (
-          <div className="relative">
-            <button
-              onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-              aria-label="Select organization"
-              aria-expanded={orgDropdownOpen}
-              className="inline-flex items-center gap-2 bg-white border border-zinc-200 text-zinc-700 text-sm font-medium px-3.5 py-2 rounded-md hover:border-zinc-300 transition-colors shadow-sm"
-            >
-              {currentOrg || 'Select org'}
-              <ChevronDown size={14} className="text-zinc-400" />
-            </button>
-            {orgDropdownOpen && (
-              <div className="absolute left-0 top-full mt-1.5 w-48 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 py-1">
-                {orgs.map((org) => (
-                  <button
-                    key={org.login}
-                    onClick={() => {
-                      setSelectedOrg(org.login)
-                      setOrgDropdownOpen(false)
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 transition-colors"
-                  >
-                    {org.name || org.login}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Repo filter */}
         <select
           value={selectedRepo}

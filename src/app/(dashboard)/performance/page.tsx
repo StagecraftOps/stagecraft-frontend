@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Gauge } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
-import { fetchOrgs, fetchLongestJobs, fetchLongestWorkflows } from '@/lib/api'
+import { PageHeader } from '@/components/ui/page-header'
+import { useOrg } from '@/lib/org-context'
+import { fetchLongestJobs, fetchLongestWorkflows } from '@/lib/api'
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`
@@ -16,14 +16,7 @@ function formatDuration(seconds: number): string {
 }
 
 export default function PerformancePage() {
-  const [selectedOrg, setSelectedOrg] = useState('')
-  const { data: orgs = [] } = useQuery({ queryKey: ['orgs'], queryFn: fetchOrgs })
-
-  useEffect(() => {
-    if (orgs.length > 0 && !selectedOrg) setSelectedOrg(orgs[0].login)
-  }, [orgs, selectedOrg])
-
-  const currentOrg = selectedOrg || orgs[0]?.login || ''
+  const { currentOrg } = useOrg()
 
   const { data: longestJobs = [], isLoading: jobsLoading } = useQuery({
     queryKey: ['longest-jobs', currentOrg],
@@ -39,30 +32,11 @@ export default function PerformancePage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-            <Gauge size={20} />
-            Runtime Performance
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Longest-running jobs and workflows — pure duration ranking, no AI involved.
-          </p>
-        </div>
-        {orgs.length > 1 && (
-          <select
-            value={currentOrg}
-            onChange={(e) => setSelectedOrg(e.target.value)}
-            className="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          >
-            {orgs.map((org) => (
-              <option key={org.login} value={org.login}>
-                {org.name || org.login}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      <PageHeader
+        eyebrow="Overview"
+        title="Runtime Performance"
+        description="Longest-running jobs and workflows — pure duration ranking, no AI involved."
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card>

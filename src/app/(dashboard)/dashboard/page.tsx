@@ -1,24 +1,18 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import {
-  GitBranch,
-  Activity,
-  XCircle,
-  Bot,
-  ChevronDown,
-  AlertCircle,
-} from 'lucide-react'
+import { useCallback } from 'react'
+import { GitBranch, Activity, XCircle, Bot, AlertCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { RemediationFeed } from '@/components/dashboard/remediation-feed'
 import { RunRow } from '@/components/workflows/run-row'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard, SkeletonRow } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
 import { useWebSocket } from '@/hooks/useWebSocket'
+import { useOrg } from '@/lib/org-context'
 import {
   fetchCurrentUser,
-  fetchOrgs,
   fetchWorkflowsByOrg,
   fetchRemediations,
   fetchRecentRuns,
@@ -28,26 +22,12 @@ import { useQueryClient } from '@tanstack/react-query'
 
 export default function DashboardPage() {
   const queryClient = useQueryClient()
-  const [selectedOrg, setSelectedOrg] = useState<string>('')
-  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false)
+  const { currentOrg, isLoading: orgsLoading } = useOrg()
 
   const { data: user } = useQuery({
     queryKey: ['user'],
     queryFn: fetchCurrentUser,
   })
-
-  const { data: orgs = [], isLoading: orgsLoading } = useQuery({
-    queryKey: ['orgs'],
-    queryFn: fetchOrgs,
-  })
-
-  useEffect(() => {
-    if (orgs.length > 0 && !selectedOrg) {
-      setSelectedOrg(orgs[0].login)
-    }
-  }, [orgs, selectedOrg])
-
-  const currentOrg = selectedOrg || orgs[0]?.login || ''
 
   const { data: workflows = [], isLoading: workflowsLoading } = useQuery({
     queryKey: ['workflows', currentOrg],
@@ -106,48 +86,11 @@ export default function DashboardPage() {
 
   return (
     <div className="p-8">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-800">
-            {greeting()}{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Here&apos;s what&apos;s happening across your pipelines.
-          </p>
-        </div>
-
-        {/* Org selector */}
-        {orgs.length > 1 && (
-          <div className="relative">
-            <button
-              onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-              aria-label="Select organization"
-              aria-expanded={orgDropdownOpen}
-              className="inline-flex items-center gap-2 bg-white border border-zinc-200 text-zinc-700 text-sm font-medium px-3.5 py-2 rounded-md hover:border-zinc-300 transition-colors shadow-sm"
-            >
-              {currentOrg || 'Select org'}
-              <ChevronDown size={14} className="text-zinc-400" />
-            </button>
-            {orgDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 py-1">
-                {orgs.map((org) => (
-                  <button
-                    key={org.login}
-                    onClick={() => {
-                      setSelectedOrg(org.login)
-                      setOrgDropdownOpen(false)
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 transition-colors"
-                  >
-                    {org.name || org.login}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <PageHeader
+        eyebrow="Overview"
+        title={`${greeting()}${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
+        description="Here's what's happening across your pipelines."
+      />
 
       {/* Stats row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">

@@ -1,9 +1,10 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { AlertCircle, GitBranch, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { DagViewer } from '@/components/dependency-graph/dag-viewer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { PageHeader } from '@/components/ui/page-header'
 import { useBuildDependencyGraph, useDependencyGraph } from '@/hooks/useDependencyGraph'
 
 export default function DependencyGraphPage() {
@@ -16,25 +17,21 @@ export default function DependencyGraphPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-            <GitBranch size={20} />
-            Dependency Graph
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {owner}/{repo} — workflow, job, and service dependency structure.
-          </p>
-        </div>
-        <button
-          onClick={() => buildGraph.mutate('main')}
-          disabled={buildGraph.isPending}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
-        >
-          <RefreshCw size={14} className={buildGraph.isPending ? 'animate-spin' : ''} />
-          {buildGraph.isPending ? 'Building…' : 'Rebuild graph'}
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="Pipelines"
+        title="Dependency Graph"
+        description={`${owner}/${repo} — workflow, job, and service dependency structure.`}
+        actions={
+          <button
+            onClick={() => buildGraph.mutate('main')}
+            disabled={buildGraph.isPending}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
+          >
+            <RefreshCw size={14} className={buildGraph.isPending ? 'animate-spin' : ''} />
+            {buildGraph.isPending ? 'Building…' : 'Rebuild graph'}
+          </button>
+        }
+      />
 
       {error && !isLoading && (
         <Card className="mb-6">

@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ShieldCheck, Upload, FileText, RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { Upload, FileText, RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { PageHeader } from '@/components/ui/page-header'
+import { useOrg } from '@/lib/org-context'
 import {
-  fetchOrgs,
   fetchWorkflowsByOrg,
   fetchGovernanceDocuments,
   uploadGovernanceDocument,
@@ -23,18 +24,12 @@ function statusIcon(status: string) {
 }
 
 export default function GovernancePage() {
-  const [selectedOrg, setSelectedOrg] = useState('')
   const [selectedRepo, setSelectedRepo] = useState('')
   const [docType, setDocType] = useState<GovernanceDocType>('governance_policy')
   const [title, setTitle] = useState('')
   const [framework, setFramework] = useState(FRAMEWORKS[0])
   const queryClient = useQueryClient()
-
-  const { data: orgs = [] } = useQuery({ queryKey: ['orgs'], queryFn: fetchOrgs })
-  useEffect(() => {
-    if (orgs.length > 0 && !selectedOrg) setSelectedOrg(orgs[0].login)
-  }, [orgs, selectedOrg])
-  const currentOrg = selectedOrg || orgs[0]?.login || ''
+  const { currentOrg } = useOrg()
 
   const { data: workflows = [] } = useQuery({
     queryKey: ['workflows', currentOrg],
@@ -83,28 +78,24 @@ export default function GovernancePage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-            <ShieldCheck size={20} />
-            Governance & Compliance
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Framework checks and policy-document gap analysis for your pipelines.
-          </p>
-        </div>
-        {repos.length > 1 && (
-          <select
-            value={currentRepo}
-            onChange={(e) => setSelectedRepo(e.target.value)}
-            className="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          >
-            {repos.map((repo) => (
-              <option key={repo} value={repo}>{repo}</option>
-            ))}
-          </select>
-        )}
-      </div>
+      <PageHeader
+        eyebrow="Quality"
+        title="Governance & Compliance"
+        description="Framework checks and policy-document gap analysis for your pipelines."
+        actions={
+          repos.length > 1 ? (
+            <select
+              value={currentRepo}
+              onChange={(e) => setSelectedRepo(e.target.value)}
+              className="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              {repos.map((repo) => (
+                <option key={repo} value={repo}>{repo}</option>
+              ))}
+            </select>
+          ) : undefined
+        }
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
         <Card>
