@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Layers, RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { useOrg } from '@/lib/org-context'
 import {
-  fetchOrgs,
   fetchWorkflowsByOrg,
   fetchTemplates,
   fetchTemplateDiffs,
@@ -22,19 +23,13 @@ function scoreColor(score: number): string {
 }
 
 export default function StandardizationPage() {
-  const [selectedOrg, setSelectedOrg] = useState('')
   const [selectedRepo, setSelectedRepo] = useState('')
   const [showRegister, setShowRegister] = useState(false)
   const [tplName, setTplName] = useState('')
   const [tplDesc, setTplDesc] = useState('')
   const [tplYaml, setTplYaml] = useState('')
   const queryClient = useQueryClient()
-
-  const { data: orgs = [] } = useQuery({ queryKey: ['orgs'], queryFn: fetchOrgs })
-  useEffect(() => {
-    if (orgs.length > 0 && !selectedOrg) setSelectedOrg(orgs[0].login)
-  }, [orgs, selectedOrg])
-  const currentOrg = selectedOrg || orgs[0]?.login || ''
+  const { currentOrg } = useOrg()
 
   const { data: workflows = [] } = useQuery({
     queryKey: ['workflows', currentOrg],
@@ -92,46 +87,42 @@ export default function StandardizationPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-            <Layers size={20} />
-            Standardization
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Template adoption gaps and reusable-component opportunities across your pipelines.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {repos.length > 1 && (
-            <select
-              value={currentRepo}
-              onChange={(e) => setSelectedRepo(e.target.value)}
-              className="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+      <PageHeader
+        eyebrow="Quality"
+        title="Standardization"
+        description="Template adoption gaps and reusable-component opportunities across your pipelines."
+        actions={
+          <>
+            {repos.length > 1 && (
+              <select
+                value={currentRepo}
+                onChange={(e) => setSelectedRepo(e.target.value)}
+                className="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                {repos.map((repo) => (
+                  <option key={repo} value={repo}>{repo}</option>
+                ))}
+              </select>
+            )}
+            <button
+              onClick={() => setShowRegister((v) => !v)}
+              disabled={!currentOrg}
+              className="px-4 py-2 text-sm font-medium rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
             >
-              {repos.map((repo) => (
-                <option key={repo} value={repo}>{repo}</option>
-              ))}
-            </select>
-          )}
-          <button
-            onClick={() => setShowRegister((v) => !v)}
-            disabled={!currentOrg}
-            className="px-4 py-2 text-sm font-medium rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
-          >
-            Register template
-          </button>
-          <button
-            onClick={() => analyze.mutate()}
-            disabled={analyze.isPending || !currentRepo || templates.length === 0}
-            title={templates.length === 0 ? 'Register a template first' : undefined}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
-          >
-            <RefreshCw size={14} className={analyze.isPending ? 'animate-spin' : ''} />
-            Analyze
-          </button>
-        </div>
-      </div>
+              Register template
+            </button>
+            <button
+              onClick={() => analyze.mutate()}
+              disabled={analyze.isPending || !currentRepo || templates.length === 0}
+              title={templates.length === 0 ? 'Register a template first' : undefined}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
+            >
+              <RefreshCw size={14} className={analyze.isPending ? 'animate-spin' : ''} />
+              Analyze
+            </button>
+          </>
+        }
+      />
 
       {showRegister && (
         <Card className="mb-6">

@@ -6,6 +6,7 @@ import { ArrowLeft, GitBranch, AlertCircle, ExternalLink } from 'lucide-react'
 import { useRepoWorkflows } from '@/hooks/useWorkflows'
 import { Badge } from '@/components/ui/badge'
 import { SkeletonCard } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default function RepoWorkflowsPage() {
   const params = useParams()
@@ -25,18 +26,18 @@ export default function RepoWorkflowsPage() {
         Back to Workflows
       </Link>
 
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
-          <span>{owner}</span>
-          <span>/</span>
-          <span className="font-semibold text-zinc-700">{repo}</span>
-        </div>
-        <h1 className="text-2xl font-bold text-zinc-800">Workflows</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          All GitHub Actions workflows in this repository.
-        </p>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
+        <span>{owner}</span>
+        <span>/</span>
+        <span className="font-semibold text-zinc-700">{repo}</span>
       </div>
+
+      <PageHeader
+        eyebrow="Pipelines"
+        title="Workflows"
+        description="All GitHub Actions workflows in this repository."
+      />
 
       {/* Error */}
       {error && (
