@@ -91,9 +91,15 @@ export interface RunTrendPoint {
 
 export interface AnalyticsData {
   total_runs: number
+  completed_runs: number
+  success_count: number
+  failure_count: number
+  other_count: number
   failure_rate: number
   success_rate: number
   remediations_raised: number
+  avg_analysis_seconds: number | null
+  avg_time_to_pr_seconds: number | null
   top_failing_repos: TopFailingRepo[]
   run_trend: RunTrendPoint[]
 }

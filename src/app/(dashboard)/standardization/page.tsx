@@ -12,6 +12,7 @@ import {
   fetchTemplateDiffs,
   fetchPatternClusters,
   analyzeStandardization,
+  createTemplate,
 } from '@/lib/api'
 
 function scoreColor(score: number): string {
@@ -23,6 +24,10 @@ function scoreColor(score: number): string {
 export default function StandardizationPage() {
   const [selectedOrg, setSelectedOrg] = useState('')
   const [selectedRepo, setSelectedRepo] = useState('')
+  const [showRegister, setShowRegister] = useState(false)
+  const [tplName, setTplName] = useState('')
+  const [tplDesc, setTplDesc] = useState('')
+  const [tplYaml, setTplYaml] = useState('')
   const queryClient = useQueryClient()
 
   const { data: orgs = [] } = useQuery({ queryKey: ['orgs'], queryFn: fetchOrgs })
@@ -69,6 +74,22 @@ export default function StandardizationPage() {
     },
   })
 
+  const register = useMutation({
+    mutationFn: () =>
+      createTemplate(currentOrg, {
+        name: tplName.trim(),
+        description: tplDesc.trim() || undefined,
+        template_yaml: tplYaml,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['templates', currentOrg] })
+      setShowRegister(false)
+      setTplName('')
+      setTplDesc('')
+      setTplYaml('')
+    },
+  })
+
   return (
     <div className="p-8">
       <div className="mb-8 flex items-start justify-between">
@@ -94,8 +115,16 @@ export default function StandardizationPage() {
             </select>
           )}
           <button
+            onClick={() => setShowRegister((v) => !v)}
+            disabled={!currentOrg}
+            className="px-4 py-2 text-sm font-medium rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+          >
+            Register template
+          </button>
+          <button
             onClick={() => analyze.mutate()}
             disabled={analyze.isPending || !currentRepo || templates.length === 0}
+            title={templates.length === 0 ? 'Register a template first' : undefined}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={14} className={analyze.isPending ? 'animate-spin' : ''} />
@@ -104,12 +133,73 @@ export default function StandardizationPage() {
         </div>
       </div>
 
-      {templates.length === 0 && (
+      {showRegister && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Register an approved template</CardTitle>
+            <CardDescription>
+              Paste the canonical workflow YAML your pipelines should follow. Adoption is scored against it.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                value={tplName}
+                onChange={(e) => setTplName(e.target.value)}
+                placeholder="Template name (e.g. Standard CI)"
+                className="text-sm border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <input
+                value={tplDesc}
+                onChange={(e) => setTplDesc(e.target.value)}
+                placeholder="Description (optional)"
+                className="text-sm border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+            <textarea
+              value={tplYaml}
+              onChange={(e) => setTplYaml(e.target.value)}
+              placeholder={'name: Standard CI\non: [push]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4'}
+              rows={10}
+              className="w-full font-mono text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+            {register.isError && (
+              <p className="text-xs text-rose-600">Failed to register template. Check the YAML and try again.</p>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => register.mutate()}
+                disabled={register.isPending || !tplName.trim() || !tplYaml.trim()}
+                className="px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
+              >
+                {register.isPending ? 'Saving…' : 'Save template'}
+              </button>
+              <button
+                onClick={() => setShowRegister(false)}
+                className="px-4 py-2 text-sm font-medium rounded-md text-zinc-500 hover:text-zinc-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {templates.length === 0 ? (
         <Card className="mb-6">
           <CardContent className="py-6 text-sm text-zinc-500">
             No approved templates registered for this org yet — template-adoption analysis (FR-3) needs at
-            least one template to diff against. Standardization-opportunity discovery (FR-4, below) works
-            without one.
+            least one template to diff against. Click <strong>Register template</strong> above to add one.
+            Standardization-opportunity discovery (FR-4, below) works without one.
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mb-6">
+          <CardContent className="py-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-zinc-500 mr-2">Approved templates:</span>
+            {templates.map((t) => (
+              <Badge key={t.id} status="analyzed" label={t.name} />
+            ))}
           </CardContent>
         </Card>
       )}
