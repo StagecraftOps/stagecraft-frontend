@@ -107,6 +107,7 @@ export interface AnalyticsData {
 export type GraphType = 'dependency' | 'knowledge'
 export type GraphStatus = 'pending' | 'building' | 'completed' | 'failed'
 export type GraphNodeType =
+  | 'workflow'
   | 'job'
   | 'reusable_workflow'
   | 'composite_action'
