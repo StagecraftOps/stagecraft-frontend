@@ -1,4 +1,4 @@
-<div class="p-8 max-w-4xl mx-auto" *ngIf="!isLoading() && remediation() as rem">
+<div class="p-8" *ngIf="!isLoading() && remediation() as rem">
   <a routerLink="/remediation" class="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 mb-6 transition-colors">
     <lucide-angular [img]="icons.ArrowLeft" [size]="14"></lucide-angular>
     Back to Remediations
@@ -215,13 +215,13 @@
   </div>
 </div>
 
-<div class="p-8 max-w-4xl mx-auto" *ngIf="isLoading()">
+<div class="p-8" *ngIf="isLoading()">
   <div class="h-6 w-48 bg-zinc-100 rounded animate-pulse mb-4"></div>
   <div class="h-32 w-full bg-zinc-100 rounded animate-pulse mb-4"></div>
   <div class="h-64 w-full bg-zinc-100 rounded animate-pulse"></div>
 </div>
 
-<div class="p-8 max-w-4xl mx-auto" *ngIf="!isLoading() && error()">
+<div class="p-8" *ngIf="!isLoading() && error()">
   <div class="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4">
     <lucide-angular [img]="icons.AlertCircle" [size]="18"></lucide-angular>
     <p class="text-sm font-medium">Failed to load remediation details.</p>
