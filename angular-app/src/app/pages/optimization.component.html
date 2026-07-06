@@ -1,0 +1,50 @@
+<div class="p-8">
+  <app-page-header eyebrow="Quality" title="Optimization" description="Bottleneck analysis, parallelization opportunities, and simulated time savings.">
+    <ng-container actions>
+      <select *ngIf="repos().length > 1" [ngModel]="selectedRepo()" (ngModelChange)="onRepoChange($event)" class="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2">
+        <option *ngFor="let repo of repos()" [value]="repo">{{ repo }}</option>
+      </select>
+      <select *ngIf="repoWorkflows().length > 1" [ngModel]="selectedWorkflow()" (ngModelChange)="selectedWorkflow.set($event)" class="text-sm border border-zinc-200 rounded-md bg-white text-zinc-700 px-3 py-2">
+        <option *ngFor="let w of repoWorkflows()" [value]="w.path">{{ w.name }}</option>
+      </select>
+      <button (click)="analyze()" [disabled]="analyzing() || !selectedWorkflow()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors">
+        <lucide-angular [img]="icons.RefreshCw" [size]="14" [class.animate-spin]="analyzing()"></lucide-angular>
+        Analyze
+      </button>
+    </ng-container>
+  </app-page-header>
+
+  <div *ngIf="recommendations().length === 0" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
+    <div class="py-12 text-center text-sm text-zinc-400">
+      No optimization recommendations yet. Analysis needs a completed dependency graph (Dependency Graph tab) and job timing data (a few completed runs) for this workflow first.
+    </div>
+  </div>
+
+  <div *ngIf="recommendations().length > 0" class="space-y-4">
+    <div *ngFor="let rec of recommendations()" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
+      <div class="py-5 px-5">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <app-badge [status]="rec.status === 'proposed' ? 'pending' : rec.status" [label]="rec.recommendation_type.replace('_', ' ')"></app-badge>
+              <span class="text-xs text-zinc-400">confidence {{ rec.confidence_score }}%</span>
+            </div>
+            <p class="text-sm text-zinc-700">{{ rec.description }}</p>
+            <div class="flex items-center gap-1.5 mt-2 text-xs text-emerald-600">
+              <lucide-angular [img]="icons.Clock" [size]="12"></lucide-angular>
+              Estimated savings: {{ formatDuration(rec.estimated_time_savings_seconds) }}
+            </div>
+          </div>
+          <div *ngIf="rec.status === 'proposed'" class="flex items-center gap-2 flex-shrink-0">
+            <button (click)="accept(rec.id)" class="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 px-2 py-1 rounded border border-emerald-200 hover:bg-emerald-50">
+              <lucide-angular [img]="icons.CheckCircle2" [size]="13"></lucide-angular> Accept
+            </button>
+            <button (click)="reject(rec.id)" class="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-rose-600 px-2 py-1 rounded border border-zinc-200 hover:bg-rose-50">
+              <lucide-angular [img]="icons.XCircle" [size]="13"></lucide-angular> Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
