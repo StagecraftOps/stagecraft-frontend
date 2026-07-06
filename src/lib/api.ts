@@ -12,6 +12,7 @@ import type {
   CriticalPathData,
   LongestJobEntry,
   LongestWorkflowEntry,
+  RunnerBreakdownEntry,
   WorkflowTemplate,
   TemplateDiff,
   PatternCluster,
@@ -249,6 +250,13 @@ export async function fetchLongestWorkflows(org: string, limit = 10): Promise<Lo
   const { data } = await api.get<LongestWorkflowEntry[]>(
     `/api/v1/orgs/${org}/performance/longest-workflows`,
     { params: { limit } }
+  )
+  return data
+}
+
+export async function fetchRunnerBreakdown(org: string): Promise<RunnerBreakdownEntry[]> {
+  const { data } = await api.get<RunnerBreakdownEntry[]>(
+    `/api/v1/orgs/${org}/performance/runner-breakdown`
   )
   return data
 }
