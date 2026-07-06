@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink, RouterLinkActive } from '@angular/router'
-import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot } from 'lucide-angular'
+import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert } from 'lucide-angular'
 import { OrgService } from '../core/org.service'
 import { ThemeService } from '../core/theme.service'
 import { ApiService } from '../core/api.service'
@@ -22,7 +22,7 @@ interface NavItem {
 export class SidebarComponent {
   @Input() user: User | null = null
 
-  icons = { LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot }
+  icons = { LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert }
 
   navSections: { section: string; items: NavItem[] }[] = [
     {
@@ -54,6 +54,7 @@ export class SidebarComponent {
       section: 'Quality',
       items: [
         { label: 'Governance', href: '/governance', icon: ShieldCheck },
+        { label: 'Audit', href: '/audit', icon: ShieldAlert },
         { label: 'Standardization', href: '/standardization', icon: Layers },
         { label: 'Optimization', href: '/optimization', icon: Zap },
         { label: 'Knowledge Graph', href: '/knowledge-graph', icon: Network },

@@ -167,6 +167,23 @@ export interface AgentFleetSummary {
   total_runs: number
 }
 
+export interface ViolationItem {
+  author: string | null
+  repo_name: string
+  pr_number: number
+  pr_url: string
+  violation: string
+  severity: string
+  risk_score: number | null
+  source: string
+  created_at: string
+}
+
+export interface ViolationFeed {
+  violations: ViolationItem[]
+  total: number
+}
+
 export interface RunsPage {
   runs: WorkflowRun[]
   total: number

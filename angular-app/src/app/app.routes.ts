@@ -21,6 +21,7 @@ import { WorkflowRepoDetailComponent } from './pages/workflow-repo-detail.compon
 import { DependencyGraphComponent } from './pages/dependency-graph.component'
 import { KnowledgeGraphComponent } from './pages/knowledge-graph.component'
 import { AiCrewComponent } from './pages/ai-crew.component'
+import { AuditComponent } from './pages/audit.component'
 
 export const routes: Routes = [
   { path: 'api/auth/callback', component: AuthCallbackComponent },
@@ -40,6 +41,7 @@ export const routes: Routes = [
       { path: 'performance', component: PerformanceComponent },
       { path: 'dependency-graph', component: DependencyGraphComponent },
       { path: 'ai-crew', component: AiCrewComponent },
+      { path: 'audit', component: AuditComponent },
       { path: 'remediation', component: RemediationListComponent },
       { path: 'remediation/:id', component: RemediationDetailComponent },
       { path: 'pr-reviews', component: PrReviewsComponent },

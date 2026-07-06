@@ -29,6 +29,7 @@ import type {
   SimulationRun,
   AgentRun,
   AgentFleetSummary,
+  ViolationFeed,
 } from './types'
 
 @Injectable({ providedIn: 'root' })
@@ -171,6 +172,15 @@ export class ApiService {
       this.http.get<{ runs: AgentRun[]; total: number }>(`${API_URL}/api/v1/agent-runs/`, { params }),
     )
     return data.runs
+  }
+
+  async fetchViolations(org: string, author?: string): Promise<ViolationFeed> {
+    const params: Record<string, string> = {}
+    if (org) params['org_login'] = org
+    if (author) params['author'] = author
+    return firstValueFrom(
+      this.http.get<ViolationFeed>(`${API_URL}/api/v1/audit/violations`, { params }),
+    )
   }
 
   fetchPRReview(id: string): Promise<PRReview> {
