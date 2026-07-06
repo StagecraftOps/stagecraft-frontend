@@ -224,6 +224,7 @@ export class ApiService {
       risk_tier?: string
       team_owner?: string
       security_contact?: string
+      notes?: string
     },
   ): Promise<ApplicationContext> {
     return firstValueFrom(

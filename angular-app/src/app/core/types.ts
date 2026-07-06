@@ -228,6 +228,7 @@ export interface ApplicationContext {
   risk_tier: string | null
   team_owner: string | null
   security_contact: string | null
+  notes: string | null
   source: string
   created_at: string
   updated_at: string

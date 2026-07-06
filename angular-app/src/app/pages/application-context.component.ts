@@ -52,6 +52,7 @@ export class ApplicationContextComponent {
   dataClassification = signal('')
   teamOwner = signal('')
   securityContact = signal('')
+  notes = signal('')
   selectedRegScope = signal<Set<string>>(new Set())
 
   constructor(public org: OrgService, private api: ApiService) {
@@ -119,6 +120,7 @@ export class ApplicationContextComponent {
         risk_tier: this.riskTier() || undefined,
         team_owner: this.teamOwner().trim() || undefined,
         security_contact: this.securityContact().trim() || undefined,
+        notes: this.notes().trim() || undefined,
       })
       await this.refreshContexts()
     } catch {
