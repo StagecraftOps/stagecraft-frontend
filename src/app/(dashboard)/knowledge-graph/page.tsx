@@ -76,7 +76,7 @@ export default function KnowledgeGraphPage() {
               </CardHeader>
             </Card>
           </div>
-          <DagViewer nodes={graph.nodes} edges={graph.edges} />
+          <DagViewer nodes={graph.nodes} edges={graph.edges} mode="knowledge" />
         </>
       )}
     </div>
