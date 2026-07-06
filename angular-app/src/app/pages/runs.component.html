@@ -59,7 +59,7 @@
               </div>
             </td>
           </tr>
-          <app-run-row *ngFor="let run of runs()" [run]="run" [showWorkflow]="true" [showRepo]="true"></app-run-row>
+          <tr app-run-row *ngFor="let run of runs()" [run]="run" [showWorkflow]="true" [showRepo]="true"></tr>
         </tbody>
       </table>
     </div>
