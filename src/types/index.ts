@@ -207,6 +207,14 @@ export interface LongestWorkflowEntry {
   duration_seconds: number
 }
 
+export interface RunnerBreakdownEntry {
+  // null = no runner was ever assigned (job still queued or cancelled
+  // before pickup) -- a real bucket, not missing data.
+  runner_labels: string[] | null
+  job_count: number
+  avg_duration_seconds: number | null
+}
+
 export interface WorkflowTemplate {
   id: string
   org_login: string
