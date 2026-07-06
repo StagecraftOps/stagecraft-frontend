@@ -34,8 +34,10 @@ export class RunsComponent implements OnInit {
     effect(() => {
       const currentOrg = this.org.currentOrg()
       if (currentOrg) {
-        this.loadWorkflows()
-        this.loadRuns()
+        queueMicrotask(() => {
+          this.loadWorkflows()
+          this.loadRuns()
+        })
       }
     })
   }

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, signal, computed } from '@angular/core'
+import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, ElementRef, ViewChild, effect, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -32,10 +32,11 @@ interface StubEdge {
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './dag-viewer.component.html',
 })
-export class DagViewerComponent implements OnChanges {
+export class DagViewerComponent implements OnChanges, AfterViewInit {
   @Input() nodes: GraphNodeData[] = []
   @Input() edges: GraphEdgeData[] = []
   @Input() mode: 'dependency' | 'knowledge' = 'dependency'
+  @ViewChild('viewport') viewportRef?: ElementRef<HTMLElement>
 
   icons = { Maximize2, Minimize2 }
   NODE_WIDTH = NODE_WIDTH
@@ -58,7 +59,43 @@ export class DagViewerComponent implements OnChanges {
   private nodesSig = signal<GraphNodeData[]>([])
   private edgesSig = signal<GraphEdgeData[]>([])
 
-  constructor(private router: Router) {}
+  private viewInitialized = false
+
+  constructor(private router: Router) {
+    effect(() => {
+      this.visibleData()
+      if (this.viewInitialized) queueMicrotask(() => this.fitToView())
+    })
+  }
+
+  ngAfterViewInit() {
+    this.viewInitialized = true
+    queueMicrotask(() => this.fitToView())
+  }
+
+  fitToView() {
+    const el = this.viewportRef?.nativeElement
+    const nodes = this.visibleData().positioned
+    if (!el || nodes.length === 0) return
+
+    const minX = Math.min(...nodes.map((n) => n.x))
+    const minY = Math.min(...nodes.map((n) => n.y))
+    const maxX = Math.max(...nodes.map((n) => n.x + NODE_WIDTH))
+    const maxY = Math.max(...nodes.map((n) => n.y + NODE_HEIGHT))
+    const boxWidth = Math.max(maxX - minX, 1)
+    const boxHeight = Math.max(maxY - minY, 1)
+
+    const cw = el.clientWidth
+    const ch = el.clientHeight
+    if (cw === 0 || ch === 0) return
+
+    const newZoom = Math.min(2, Math.max(0.05, Math.min(cw / boxWidth, ch / boxHeight) * 0.9))
+    const centerX = (minX + maxX) / 2
+    const centerY = (minY + maxY) / 2
+
+    this.zoom.set(newZoom)
+    this.pan.set({ x: cw / 2 - centerX * newZoom, y: ch / 2 - centerY * newZoom })
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['nodes']) this.nodesSig.set(this.nodes)
@@ -428,6 +465,7 @@ export class DagViewerComponent implements OnChanges {
 
   toggleExpanded() {
     this.expanded.set(!this.expanded())
+    queueMicrotask(() => this.fitToView())
   }
 
   onWheel(event: WheelEvent) {
@@ -454,8 +492,7 @@ export class DagViewerComponent implements OnChanges {
   }
 
   resetView() {
-    this.pan.set({ x: 0, y: 0 })
-    this.zoom.set(1)
+    this.fitToView()
   }
 
   footerText(): string {
