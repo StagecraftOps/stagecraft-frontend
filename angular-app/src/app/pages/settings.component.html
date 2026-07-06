@@ -1,0 +1,53 @@
+<div class="p-8 max-w-3xl">
+  <app-page-header title="Settings" description="Manage your connected GitHub organizations."></app-page-header>
+
+  <div class="bg-white border border-zinc-200 rounded-lg shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
+    <div class="flex flex-col space-y-1 p-5 border-b border-zinc-100 dark:border-zinc-800">
+      <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-100 leading-none tracking-tight">Connected Organizations</h3>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">Organizations tracked by Stagecraft via the Stagecraft GitHub App.</p>
+    </div>
+    <div class="p-5">
+      <div *ngIf="isLoading()" class="space-y-2">
+        <div class="h-12 bg-zinc-50 rounded-lg animate-pulse"></div>
+        <div class="h-12 bg-zinc-50 rounded-lg animate-pulse"></div>
+      </div>
+
+      <div *ngIf="!isLoading() && orgs().length === 0" class="flex items-center gap-3 py-6 text-center justify-center text-zinc-400">
+        <lucide-angular [img]="icons.AlertCircle" [size]="16"></lucide-angular>
+        <p class="text-sm">No organizations connected yet.</p>
+      </div>
+
+      <div *ngIf="!isLoading() && orgs().length > 0" class="space-y-2 mb-5">
+        <div *ngFor="let org of orgs()" class="flex items-center gap-3 p-3 bg-zinc-50 border border-zinc-100 rounded-lg">
+          <img *ngIf="org.avatar_url" [src]="org.avatar_url" [alt]="org.login" width="28" height="28" class="rounded-full" />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-zinc-800 truncate">{{ org.name || org.login }}</p>
+            <p class="text-xs text-zinc-400 truncate">&#64;{{ org.login }}</p>
+          </div>
+          <a [href]="'https://github.com/' + org.login" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 transition-colors">
+            <lucide-angular [img]="icons.ExternalLink" [size]="13"></lucide-angular>
+          </a>
+          <button
+            (click)="remove(org.login)"
+            [disabled]="removingLogin() === org.login"
+            title="Remove organization"
+            [attr.aria-label]="'Remove ' + org.login"
+            class="inline-flex items-center justify-center h-7 w-7 rounded-md text-zinc-400 hover:text-rose-500 disabled:opacity-50"
+          >
+            <lucide-angular [img]="icons.Trash2" [size]="13"></lucide-angular>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-zinc-100">
+        <p class="text-xs text-zinc-500 mb-3">
+          To connect a new organization, install the Stagecraft GitHub App on it. Once installed, it will appear here automatically.
+        </p>
+        <button (click)="install()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 transition-colors">
+          <lucide-angular [img]="icons.Github" [size]="15"></lucide-angular>
+          Install GitHub App
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
