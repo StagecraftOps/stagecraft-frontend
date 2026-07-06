@@ -98,7 +98,7 @@ export function Sidebar({ user }: SidebarProps) {
 
   return (
     <aside className="w-60 h-screen flex flex-col bg-white border-r border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 flex-shrink-0">
-      {/* Logo */}
+      {}
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
         <span
           className="text-zinc-900 dark:text-zinc-100 tracking-tight"
@@ -109,7 +109,7 @@ export function Sidebar({ user }: SidebarProps) {
         <ThemeToggle />
       </div>
 
-      {/* Org picker — shared across every page via OrgProvider */}
+      {}
       {orgs.length > 0 && (
         <div className="px-3 pt-3">
           {orgs.length > 1 ? (
@@ -131,7 +131,7 @@ export function Sidebar({ user }: SidebarProps) {
         </div>
       )}
 
-      {/* Navigation */}
+      {}
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
         {navSections.map((group) => (
           <div key={group.section} className="mb-4">
@@ -143,12 +143,12 @@ export function Sidebar({ user }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Settings pinned above the user footer */}
+      {}
       <div className="px-3 py-2 border-t border-zinc-100 dark:border-zinc-800">
         {renderLink(settingsItem)}
       </div>
 
-      {/* User footer */}
+      {}
       {user && (
         <div className="border-t border-zinc-100 dark:border-zinc-800 p-4">
           <div className="flex items-center gap-3">

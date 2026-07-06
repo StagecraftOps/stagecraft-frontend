@@ -66,9 +66,9 @@ export default function WorkflowsPage() {
         description="All GitHub Actions workflows across your organization."
       />
 
-      {/* Toolbar */}
+      {}
       <div className="flex items-center gap-3 flex-wrap mb-6">
-        {/* Search */}
+        {}
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search
             size={14}
@@ -83,7 +83,7 @@ export default function WorkflowsPage() {
           />
         </div>
 
-        {/* Status filters */}
+        {}
         <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-md">
           {filterButtons.map((btn) => (
             <button
@@ -105,7 +105,7 @@ export default function WorkflowsPage() {
         </span>
       </div>
 
-      {/* Error */}
+      {}
       {error && (
         <div className="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
           <AlertCircle size={16} />
@@ -113,7 +113,7 @@ export default function WorkflowsPage() {
         </div>
       )}
 
-      {/* Grid */}
+      {}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {[...Array(9)].map((_, i) => (

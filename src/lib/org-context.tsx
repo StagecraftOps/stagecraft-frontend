@@ -16,23 +16,15 @@ interface OrgContextValue {
 
 const OrgContext = createContext<OrgContextValue | null>(null)
 
-/**
- * Single source of truth for the selected organization, shared across every
- * dashboard page. Seeds from the ['orgs'] query, remembers the choice in
- * localStorage, and falls back to the first org. Replaces the per-page
- * useState + useEffect + <select> that was duplicated across ~8 pages.
- */
 export function OrgProvider({ children }: { children: React.ReactNode }) {
   const { data: orgs = [], isLoading } = useQuery({ queryKey: ['orgs'], queryFn: fetchOrgs })
   const [selected, setSelected] = useState('')
 
-  // Restore persisted choice on mount (client only).
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null
     if (saved) setSelected(saved)
   }, [])
 
-  // Once orgs load, ensure the selection is valid (or default to the first).
   useEffect(() => {
     if (orgs.length === 0) return
     const valid = orgs.some((o) => o.login === selected)

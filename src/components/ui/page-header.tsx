@@ -1,10 +1,5 @@
 import type { ReactNode } from 'react'
 
-/**
- * Consistent page header for the dashboard — echoes the marketing site's
- * editorial style (mono eyebrow + serif display title) so the post-login UI
- * feels like the same product. Replaces the ~14 hand-rolled <h1> blocks.
- */
 export function PageHeader({
   eyebrow,
   title,

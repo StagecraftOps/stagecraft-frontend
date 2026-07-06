@@ -17,7 +17,7 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-zinc-50 noise-overlay">
-      {/* Subtle grid lines */}
+      {}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(8)].map((_, i) => (
           <div
@@ -35,13 +35,13 @@ export function HeroSection() {
         ))}
       </div>
 
-      {/* Amber gradient orb */}
+      {}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] lg:w-[700px] lg:h-[700px] pointer-events-none opacity-30">
         <div className="w-full h-full rounded-full bg-gradient-radial from-amber-300 via-amber-200 to-transparent blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-32 lg:py-40">
-        {/* Eyebrow */}
+        {}
         <div
           className={`mb-8 transition-all duration-700 ${
             visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -53,7 +53,7 @@ export function HeroSection() {
           </span>
         </div>
 
-        {/* Headline */}
+        {}
         <div className="mb-12">
           <h1
             className={`font-serif-display leading-[0.92] tracking-tight transition-all duration-1000 text-zinc-900 ${
@@ -83,7 +83,7 @@ export function HeroSection() {
           </h1>
         </div>
 
-        {/* Description + CTAs */}
+        {}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-end">
           <p
             className={`text-xl lg:text-2xl text-zinc-500 leading-relaxed max-w-xl transition-all duration-700 delay-200 ${
@@ -119,7 +119,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Live stats strip */}
+        {}
         <div
           className={`mt-20 pt-8 border-t border-zinc-200 transition-all duration-700 delay-500 ${
             visible ? 'opacity-100' : 'opacity-0'

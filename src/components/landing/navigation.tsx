@@ -37,7 +37,7 @@ export function Navigation() {
             isScrolled ? 'h-14' : 'h-20'
           }`}
         >
-          {/* Logo */}
+          {}
           <a href="/" className="flex items-center gap-2">
             <span
               className={`font-serif-display tracking-tight text-zinc-900 transition-all duration-500 ${
@@ -48,7 +48,7 @@ export function Navigation() {
             </span>
           </a>
 
-          {/* Desktop nav */}
+          {}
           <div className="hidden md:flex items-center gap-10">
             {navLinks.map((link) => (
               <a
@@ -62,7 +62,7 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Desktop CTAs */}
+          {}
           <div className="hidden md:flex items-center gap-4">
             <a
               href="/api/auth/github"
@@ -82,7 +82,7 @@ export function Navigation() {
             </a>
           </div>
 
-          {/* Mobile toggle */}
+          {}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
@@ -92,7 +92,7 @@ export function Navigation() {
           </button>
         </div>
 
-        {/* Mobile menu */}
+        {}
         {mobileOpen && (
           <div className="md:hidden px-6 pb-6 pt-2 border-t border-zinc-100">
             <div className="flex flex-col gap-4">

@@ -58,8 +58,6 @@ const EDGE_STYLE_BY_CONFIDENCE: Record<GraphEdgeConfidence, { strokeDasharray?: 
   ambiguous: { strokeDasharray: '2 4', stroke: '#ef4444' },
 }
 
-// Client-only rendering concepts -- not real API node_type/edge_type values,
-// so kept local to this component rather than in the shared types file.
 type CollapsedEdge = {
   id: string
   source_node_id: string
@@ -70,12 +68,6 @@ type CollapsedEdge = {
 type StubNode = { id: string; label: string; resolvedWorkflowId: string | null }
 type StubEdge = { id: string; source: string; target: string; edge_type: string }
 
-// Normalized shapes the render pipeline consumes regardless of which level
-// (collapsed workflow-to-workflow, or drilled into one workflow's jobs) is
-// active -- nodeType: null marks a stub (external-reference) node.
-// emphasize marks a node for a visual callout regardless of search/focus
-// state -- used for a workflow with a failure attached, in the knowledge
-// graph's collapsed view (see knowledgeCollapsed below).
 type DisplayNode = { id: string; label: string; nodeType: string | null; emphasize?: boolean }
 type DisplayEdge = {
   id: string
@@ -89,11 +81,7 @@ type DisplayEdge = {
 function layoutWithDagre(nodes: Node[], edges: Edge[]): Node[] {
   const g = new dagre.graphlib.Graph()
   g.setDefaultEdgeLabel(() => ({}))
-  // rankdir 'TB' spreads same-rank nodes horizontally (side by side) and
-  // stacks ranks vertically — with a heavily-populated rank (e.g. hundreds
-  // of jobs under one workflow), that reads as a wide, landscape-shaped
-  // graph that suits a wide desktop screen, instead of 'LR' which would
-  // stack that same rank into one very tall, narrow column.
+
   g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 120 })
 
   nodes.forEach((node) => g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT }))
@@ -107,23 +95,11 @@ function layoutWithDagre(nodes: Node[], edges: Edge[]): Node[] {
   })
 }
 
-// The collapsed workflow-to-workflow view is a hub-and-spoke graph (dozens
-// of workflows all calling the same handful of shared templates) — a
-// hierarchical layout (dagre) forces those many-to-few edges to sprawl
-// across the full width and cross everything in between, however it's
-// ranked. A circular layout (nodes evenly spaced on a ring, edges as
-// chords through the interior) is the standard fix for this graph shape:
-// hub nodes get short converging chords instead of long crossing lines.
-// The drilled (one workflow's job-dependency) view stays on dagre —
-// needs/needs_output between jobs is a genuine pipeline DAG, which a
-// hierarchical layout suits well.
 function layoutCircular(nodes: Node[]): Node[] {
   const count = nodes.length
   if (count === 0) return nodes
   if (count === 1) return [{ ...nodes[0], position: { x: 0, y: 0 } }]
 
-  // Circumference must fit every node's width plus a gap, or adjacent
-  // nodes/labels overlap on the ring.
   const circumference = count * (NODE_WIDTH + 40)
   const radius = Math.max(300, circumference / (2 * Math.PI))
 
@@ -143,15 +119,7 @@ interface DagViewerProps {
   nodes: GraphNodeData[]
   edges: GraphEdgeData[]
   className?: string
-  // 'dependency' (default): the two-level workflow-to-workflow collapse
-  // described above. 'knowledge': also two-level, but shaped differently --
-  // there are no workflow-to-workflow edges in the knowledge graph, every
-  // edge points from a GovernanceRule/Failure/RuntimeMetric INTO a workflow
-  // (a dense bipartite fan-in: some governance rules apply to 90+ of ~111
-  // workflows), so the collapsed level here is a plain directory of
-  // workflow nodes with a count badge and no edges at all, and drilling in
-  // shows just that one workflow's own connected rules/failures/metrics
-  // (bounded to a handful, unlike the full org-wide fan-in).
+
   mode?: 'dependency' | 'knowledge'
 }
 
@@ -160,8 +128,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
   const [query, setQuery] = useState('')
   const [focusId, setFocusId] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
-  // null => collapsed (workflow-to-workflow) view, the default; set to a
-  // workflow node's id => drilled into that workflow's internal jobs.
+
   const [drilledWorkflowId, setDrilledWorkflowId] = useState<string | null>(null)
   const { getNodes, fitView } = useReactFlow()
   const router = useRouter()
@@ -183,12 +150,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     return m
   }, [nodes])
 
-  // Collapsed (default) level: one node per workflow, edges aggregated from
-  // real workflow_run_trigger edges plus uses_reusable/matrix_fanout edges
-  // whose target resolved (via the backend bridging fix) to a real workflow
-  // node -- an unresolved external/marketplace reference has no workflow to
-  // point at collapsed, so it's simply omitted here (still visible as a
-  // drill-down stub).
   const collapsed = useMemo(() => {
     const collapsedNodes: GraphNodeData[] = workflowNodes.map((n) => ({ ...n }))
 
@@ -214,9 +175,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
         if (existing) existing.count += 1
         else agg.set(key, { source: sourceWorkflow.id, target: targetNode.id, kind: 'calls_reusable', count: 1 })
       }
-      // orchestrator_service_dep / repository_dispatch / needs /
-      // needs_output / uses_composite are job- or service-level, not shown
-      // at the collapsed workflow-to-workflow level.
+
     }
 
     const collapsedEdges: CollapsedEdge[] = Array.from(agg.values()).map((a) => ({
@@ -230,9 +189,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     return { collapsedNodes, collapsedEdges }
   }, [workflowNodes, workflowNodeByFile, edges, nodeById])
 
-  // Drilled level: one workflow's own jobs + composite actions + their
-  // internal edges, plus external-reference stubs in both directions
-  // (outgoing calls, incoming callers, workflow_run_trigger either way).
   const drilled = useMemo(() => {
     if (!drilledWorkflowId) return null
     const workflow = nodeById.get(drilledWorkflowId)
@@ -268,10 +224,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
         stubNodes.set(stubId, {
           id: stubId,
           label: target.display_name,
-          // Only local (bridged) workflow refs and direct workflow-to-workflow
-          // edges resolve to a real workflow node the user can drill into
-          // next; external/marketplace refs and service/external_repo
-          // targets stay inert.
+
           resolvedWorkflowId: target.node_type === 'workflow' ? target.id : null,
         })
       }
@@ -294,8 +247,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
         }
       }
       if ((e.edge_type === 'uses_reusable' || e.edge_type === 'matrix_fanout') && e.target_node_id === drilledWorkflowId) {
-        // incoming: some other workflow's job calls into this one (only
-        // possible if this workflow itself is a bridged `uses:` target).
+
         const source = nodeById.get(e.source_node_id)
         if (source) addStub(source, e.id, e.source_node_id, drilledWorkflowId, e.edge_type)
       }
@@ -310,12 +262,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     }
   }, [drilledWorkflowId, nodeById, jobsByWorkflowFile, edges])
 
-  // Knowledge-mode collapsed level: every GOVERNS/CAUSED_BY/MEASURED_BY edge
-  // points FROM a rule/failure/metric INTO a workflow -- there is no
-  // workflow-to-workflow edge to draw, so this level is a plain count per
-  // workflow rather than a structural graph (unlike the dependency graph's
-  // collapsed level, which has real workflow_run_trigger/calls_reusable
-  // edges to show).
   const knowledgeCounts = useMemo(() => {
     if (mode !== 'knowledge') return null
     const counts = new Map<string, { rules: number; failures: number; metrics: number }>()
@@ -331,11 +277,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     return counts
   }, [mode, edges, nodeById])
 
-  // Knowledge-mode drilled level: one workflow's own connected
-  // rules/failures/metrics -- bounded to a handful even for a workflow one
-  // of the ~100-fanout "applies to nearly everything" rules touches, since
-  // this only shows edges targeting THIS workflow, not the rule's full
-  // org-wide fan-out.
   const knowledgeDrilled = useMemo(() => {
     if (mode !== 'knowledge' || !drilledWorkflowId) return null
     const workflow = nodeById.get(drilledWorkflowId)
@@ -348,8 +289,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     return { workflow, sourceNodes, edges: relevantEdges }
   }, [mode, drilledWorkflowId, edges, nodeById])
 
-  // Normalize whichever level is active into a shape the render pipeline
-  // below can consume uniformly.
   const { displayNodes, displayEdges } = useMemo(() => {
     if (mode === 'knowledge') {
       if (drilledWorkflowId && knowledgeDrilled) {
@@ -367,8 +306,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
         return { displayNodes: kNodes, displayEdges: kEdges }
       }
 
-      // Collapsed: a directory of workflow nodes, no edges -- see
-      // knowledgeCounts above for why there's nothing structural to draw here.
       const kNodes: DisplayNode[] = workflowNodes.map((n) => {
         const c = knowledgeCounts?.get(n.id)
         const parts: string[] = []
@@ -427,14 +364,12 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
   const typeCounts = useMemo(() => {
     const m: Record<string, number> = {}
     for (const n of displayNodes) {
-      if (n.nodeType === null) continue // stubs are a navigation aid, not a data category
+      if (n.nodeType === null) continue
       m[n.nodeType] = (m[n.nodeType] ?? 0) + 1
     }
     return m
   }, [displayNodes])
 
-  // Undirected adjacency, so focusing a node shows both its dependencies and
-  // its dependents.
   const neighborsOf = useMemo(() => {
     const adj = new Map<string, Set<string>>()
     for (const e of displayEdges) {
@@ -496,17 +431,13 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     const rfEdges: Edge[] = displayEdges
       .filter((e) => visible.has(e.source_node_id) && visible.has(e.target_node_id))
       .map((e) => {
-        // At the collapsed level, "calls reusable" edges are the numerous,
-        // noisy ones (up to hundreds, converging on a handful of shared
-        // templates) -- a text label on every one of them clutters the view
-        // as much as the lines themselves. workflow_run_trigger edges are
-        // rare and meaningful, so those stay labeled.
+
         const suppressLabel = e.edge_type === 'calls_reusable'
         return {
           id: e.id,
           source: e.source_node_id,
           target: e.target_node_id,
-          type: 'default', // explicit bezier curve -- distinguishes overlapping chords in the circular layout
+          type: 'default',
           label: suppressLabel
             ? undefined
             : e.count && e.count > 1
@@ -518,15 +449,6 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
         }
       })
 
-    // Collapsed (workflow-to-workflow) view is hub-and-spoke -- circular
-    // layout suits it, including when focused down to one workflow + its
-    // callers/callees (still a small hub). Drilled (one workflow's job DAG,
-    // or one workflow's own rules/failures/metrics) is a genuine hierarchy
-    // with a real center -- dagre's ranked layout communicates that better
-    // than a ring. Knowledge graph's collapsed level is a flat directory
-    // with no edges at all, which a ring displays as an evenly-spaced menu
-    // to pick from -- also better than dagre, which would arbitrarily rank
-    // 111 edge-less nodes into a meaningless single column.
     const useCircularLayout = !drilledWorkflowId
     return {
       flowNodes: useCircularLayout ? layoutCircular(rfNodes) : layoutWithDagre(rfNodes, rfEdges),
@@ -534,15 +456,11 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     }
   }, [displayNodes, displayEdges, hidden, query, focusId, neighborsOf, drilledWorkflowId, mode])
 
-  // Re-fit the viewport whenever the visible set changes (filter/focus/
-  // drill), so the user always lands on a framed view instead of an
-  // off-screen cluster.
   useEffect(() => {
     const t = setTimeout(() => fitView({ duration: 300, padding: 0.15 }), 60)
     return () => clearTimeout(t)
   }, [hidden, focusId, expanded, drilledWorkflowId, fitView])
 
-  // Esc exits the expanded (landscape) view.
   useEffect(() => {
     if (!expanded) return
     const onKey = (e: KeyboardEvent) => {
@@ -564,10 +482,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
           }
           return
         }
-        // external_key is `failure::{remediation_id}` (see
-        // stagecraft-worker's knowledge_graph_builder.py) -- the remediation
-        // page already has the full root-cause/fix/confidence analysis,
-        // this just closes the loop from "there's a failure here" to it.
+
         if (clicked?.node_type === 'failure') {
           const remediationId = clicked.external_key.replace(/^failure::/, '')
           router.push(`/remediation/${remediationId}`)
@@ -588,14 +503,14 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
       } else {
         const stub = drilled?.stubNodes.find((s) => s.id === node.id)
         if (stub?.resolvedWorkflowId) {
-          setDrilledWorkflowId(stub.resolvedWorkflowId) // drill sideways into the referenced workflow
+          setDrilledWorkflowId(stub.resolvedWorkflowId)
           setFocusId(null)
           setQuery('')
           return
         }
-        if (stub) return // inert stub (external/marketplace ref, or a service/external_repo target)
+        if (stub) return
       }
-      setFocusId(node.id) // existing focus-neighbors behavior, scoped within the active level
+      setFocusId(node.id)
     },
     [mode, drilledWorkflowId, nodeById, drilled, router],
   )

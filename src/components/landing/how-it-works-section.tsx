@@ -86,7 +86,7 @@ export function HowItWorksSection() {
 
   return (
     <section id="how-it-works" ref={ref} className="relative py-24 lg:py-32 bg-zinc-900 text-white overflow-hidden">
-      {/* Diagonal lines */}
+      {}
       <div
         className="absolute inset-0 opacity-[0.025] pointer-events-none"
         style={{
@@ -113,7 +113,7 @@ export function HowItWorksSection() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Step list */}
+          {}
           <div className="space-y-0">
             {steps.map((step, i) => (
               <button
@@ -147,7 +147,7 @@ export function HowItWorksSection() {
             ))}
           </div>
 
-          {/* Code display */}
+          {}
           <div className="lg:sticky lg:top-32 self-start">
             <div className="border border-white/10 rounded-lg overflow-hidden">
               <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">

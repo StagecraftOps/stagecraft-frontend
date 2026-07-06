@@ -24,7 +24,7 @@ export default function SettingsPage() {
   })
 
   const handleInstall = () => {
-    // The API redirects to GitHub App install page with the user's session cookie
+    
     window.location.href = getOrgInstallUrl()
   }
 
@@ -62,7 +62,7 @@ export default function SettingsPage() {
                   className="flex items-center gap-3 p-3 bg-zinc-50 border border-zinc-100 rounded-lg"
                 >
                   {org.avatar_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
+                    
                     <img
                       src={org.avatar_url}
                       alt={org.login}

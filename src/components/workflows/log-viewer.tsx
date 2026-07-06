@@ -42,7 +42,7 @@ export function LogViewer({ logs }: LogViewerProps) {
 
   return (
     <div className="rounded-lg overflow-hidden border border-zinc-800">
-      {/* Toolbar */}
+      {}
       <div className="flex items-center gap-2 bg-zinc-800 px-3 py-2">
         <div className="flex gap-1.5">
           <span className="w-3 h-3 rounded-full bg-rose-400" />
@@ -77,7 +77,7 @@ export function LogViewer({ logs }: LogViewerProps) {
         </button>
       </div>
 
-      {/* Log body */}
+      {}
       <div className="bg-zinc-950 max-h-[520px] overflow-auto font-mono text-xs leading-relaxed">
         <table className="w-full border-collapse">
           <tbody>

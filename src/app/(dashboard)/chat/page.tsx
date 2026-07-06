@@ -21,9 +21,6 @@ interface ChatApiResponse {
   error?: string | null
 }
 
-// A mix of both engine paths: the first two are COUNT/ranking questions that
-// hit the fast SQL analytics path; the rest are INVESTIGATE questions that run
-// the AI investigator over real run history.
 const SUGGESTIONS = [
   'Which repository has the most failures?',
   'How many workflow runs failed in the last 7 days?',
@@ -147,7 +144,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-zinc-950">
-      {/* Header */}
+      {}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur">
         <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
           <Bot size={16} className="text-amber-400" />
@@ -158,7 +155,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Messages */}
+      {}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {showWelcome && (
           <div className="flex gap-3 justify-start">
@@ -207,7 +204,7 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestions (only shown when no messages yet) */}
+      {}
       {showWelcome && (
         <div className="px-6 pb-2">
           <p className="text-xs text-zinc-500 mb-2">Try asking:</p>
@@ -225,7 +222,7 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Input */}
+      {}
       <div className="px-6 py-4 border-t border-zinc-800 bg-zinc-900/50">
         <form
           onSubmit={(e) => { e.preventDefault(); sendMessage(input) }}

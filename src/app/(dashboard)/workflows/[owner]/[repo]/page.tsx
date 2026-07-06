@@ -17,7 +17,7 @@ export default function RepoWorkflowsPage() {
 
   return (
     <div className="p-8">
-      {/* Back */}
+      {}
       <Link
         href="/workflows"
         className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 mb-6 transition-colors"
@@ -26,7 +26,7 @@ export default function RepoWorkflowsPage() {
         Back to Workflows
       </Link>
 
-      {/* Breadcrumb */}
+      {}
       <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
         <span>{owner}</span>
         <span>/</span>
@@ -39,7 +39,7 @@ export default function RepoWorkflowsPage() {
         description="All GitHub Actions workflows in this repository."
       />
 
-      {/* Error */}
+      {}
       {error && (
         <div className="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
           <AlertCircle size={16} />
@@ -47,7 +47,7 @@ export default function RepoWorkflowsPage() {
         </div>
       )}
 
-      {/* Workflow list */}
+      {}
       {isLoading ? (
         <div className="space-y-4">
           {[...Array(4)].map((_, i) => (
