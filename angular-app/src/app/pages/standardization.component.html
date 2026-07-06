@@ -7,12 +7,20 @@
       <button (click)="showRegister.set(!showRegister())" [disabled]="!org.currentOrg()" class="px-4 py-2 text-sm font-medium rounded-md border border-zinc-200 text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 transition-colors">
         Register template
       </button>
-      <button (click)="analyze()" [disabled]="analyzing() || !selectedRepo() || templates().length === 0" [title]="templates().length === 0 ? 'Register a template first' : ''" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors">
+      <button (click)="analyze()" [disabled]="analyzing() || !selectedRepo()" [title]="templates().length === 0 ? 'Reuse/duplication detection runs without a template; register one to also get adoption scoring' : ''" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors">
         <lucide-angular [img]="icons.RefreshCw" [size]="14" [class.animate-spin]="analyzing()"></lucide-angular>
         Analyze
       </button>
     </ng-container>
   </app-page-header>
+
+  <div *ngIf="patterns().length > 0" class="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 dark:bg-amber-500/10 dark:border-amber-500/20">
+    <lucide-angular [img]="icons.AlertTriangle" [size]="18" class="text-amber-600 shrink-0"></lucide-angular>
+    <p class="text-sm text-amber-800 dark:text-amber-300">
+      <strong>{{ patterns().length }} reuse/duplication {{ patterns().length === 1 ? 'opportunity' : 'opportunities' }} flagged</strong>
+      in {{ selectedRepo() || 'this org' }} — job logic repeated across workflows instead of a shared action, job, or reusable workflow. This is flagged independently of template-adoption gaps below.
+    </p>
+  </div>
 
   <div *ngIf="showRegister()" class="bg-white border border-zinc-200 rounded-lg shadow-sm mb-6">
     <div class="flex flex-col space-y-1 p-5 border-b border-zinc-100">
@@ -92,6 +100,7 @@
           <div *ngFor="let pattern of patterns()" class="border border-zinc-100 rounded-md p-3">
             <div class="flex items-center justify-between mb-1 gap-2">
               <div class="flex items-center gap-1.5">
+                <span *ngIf="pattern.pattern_signature.candidate_type" class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700">{{ pattern.pattern_signature.candidate_type }}</span>
                 <app-badge status="analyzed" [label]="pattern.pattern_signature.pattern_name ?? 'Reusable candidate'"></app-badge>
                 <span *ngIf="pattern.pattern_signature.match_type === 'semantic'" title="Found by an LLM judging functionally-similar (not byte-identical) jobs as the same pattern" class="flex items-center gap-1 text-xs text-violet-600">
                   <lucide-angular [img]="icons.Sparkles" [size]="11"></lucide-angular> AI-detected

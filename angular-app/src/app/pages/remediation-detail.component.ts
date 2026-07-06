@@ -1,11 +1,12 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core'
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink, ActivatedRoute } from '@angular/router'
 import { LucideAngularModule, ArrowLeft, ExternalLink, Bot, AlertCircle, CheckCircle2, Clock, GitPullRequest, Copy, Check, Loader2 } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { BadgeComponent } from '../shared/badge.component'
 import { ApiService } from '../core/api.service'
-import { formatDate, formatRelativeTime } from '../core/utils'
+import { formatDate, formatRelativeTime, diffYamlLines } from '../core/utils'
+import type { YamlDiffLine } from '../core/utils'
 import type { Remediation } from '../core/types'
 
 @Component({
@@ -74,6 +75,13 @@ export class RemediationDetailComponent implements OnInit, OnDestroy {
       setTimeout(() => this.copied.set(false), 2000)
     } catch {}
   }
+
+  yamlDiff = computed<YamlDiffLine[]>(() => {
+    const rem = this.remediation()
+    if (!rem?.suggested_yaml) return []
+    return diffYamlLines(rem.original_yaml, rem.suggested_yaml)
+  })
+  addedLineCount = computed(() => this.yamlDiff().filter(l => l.kind === 'added').length)
 
   isPending() { return this.remediation()?.status === 'pending' }
   isAnalyzing() { return this.remediation()?.status === 'analyzing' }

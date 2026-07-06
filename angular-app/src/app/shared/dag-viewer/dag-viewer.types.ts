@@ -27,6 +27,19 @@ export const TYPE_LABELS: Record<string, string> = {
   failure: 'Failures',
 }
 
+export const NODE_DESCRIPTIONS: Record<string, string> = {
+  workflow: 'A GitHub Actions workflow file (.github/workflows/*.yml) — the top-level pipeline definition that triggers on events like push or pull_request.',
+  job: 'A job within a workflow — a set of steps that run together on one runner. Jobs can depend on each other or run in parallel.',
+  reusable_workflow: 'A reusable workflow called via "uses:" — shared CI/CD logic defined once and invoked from multiple pipelines.',
+  composite_action: 'A composite GitHub Action — a packaged, reusable set of steps invoked as a single step in a job.',
+  service: "A service in this repo's architecture, inferred from its dependency/orchestrator config — represents a deployable unit, not a workflow file.",
+  external_repo: 'A cross-repository dependency, detected via repository_dispatch or a workflow_run trigger — this pipeline affects or is affected by another repo.',
+  governance_rule: 'A compliance or governance requirement this pipeline is being measured against (e.g. a control from an uploaded policy document or framework).',
+  app_requirement: 'An application-level requirement or context signal (e.g. regulatory scope, risk tier) used to interpret findings for this pipeline.',
+  runtime_metric: 'A measured runtime signal (e.g. duration, failure rate) attached to this node from actual pipeline executions, not static analysis.',
+  failure: 'A recorded failure or remediation event tied to this node, sourced from the AI remediation history.',
+}
+
 export interface DisplayNode {
   id: string
   label: string

@@ -58,8 +58,11 @@
         <div class="flex flex-col space-y-1 p-5 border-b border-zinc-100">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-semibold text-zinc-800 leading-none tracking-tight">Suggested Fix</h3>
-            <span *ngIf="isAnalyzed()" class="text-xs text-zinc-400 bg-zinc-100 px-2 py-1 rounded">Review before raising PR</span>
-            <span *ngIf="isPrRaised()" class="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded">PR raised</span>
+            <div class="flex items-center gap-2">
+              <span *ngIf="rem.original_yaml && addedLineCount() > 0" class="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded">{{ addedLineCount() }} line{{ addedLineCount() !== 1 ? 's' : '' }} changed</span>
+              <span *ngIf="isAnalyzed()" class="text-xs text-zinc-400 bg-zinc-100 px-2 py-1 rounded">Review before raising PR</span>
+              <span *ngIf="isPrRaised()" class="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded">PR raised</span>
+            </div>
           </div>
         </div>
         <div class="p-0">
@@ -84,7 +87,8 @@
                 </ng-template>
               </button>
             </div>
-            <pre class="p-5 text-xs text-zinc-300 font-mono leading-relaxed overflow-x-auto max-h-[480px]"><code>{{ rem.suggested_yaml }}</code></pre>
+            <pre class="p-5 text-xs text-zinc-300 font-mono leading-relaxed overflow-x-auto max-h-[480px]"><code
+              ><ng-container *ngFor="let line of yamlDiff()"><span [class.bg-emerald-900]="line.kind === 'added'" [class.border-l-2]="line.kind === 'added'" [class.border-emerald-500]="line.kind === 'added'" [class.pl-2]="line.kind === 'added'" [class.-ml-2]="line.kind === 'added'" class="block">{{ line.text }}</span></ng-container></code></pre>
           </div>
         </div>
       </div>

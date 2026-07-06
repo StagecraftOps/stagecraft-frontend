@@ -63,6 +63,7 @@ export interface Remediation {
   workflow_file: string
   root_cause: string
   suggested_yaml: string | null
+  original_yaml: string | null
   pr_url: string | null
   pr_number: number | null
   pr_branch: string | null
@@ -355,6 +356,7 @@ export interface TemplateDiff {
 export interface PatternClusterSignature {
   components: string[]
   match_type?: 'exact' | 'semantic'
+  candidate_type?: 'ACTION' | 'JOB' | 'WORKFLOW'
   pattern_name?: string
   draft_template_yaml?: string
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { LucideAngularModule, Maximize2, Minimize2 } from 'lucide-angular'
 import type { GraphNodeData, GraphEdgeData } from '../../core/types'
-import { NODE_WIDTH, NODE_HEIGHT, NODE_COLORS, TYPE_LABELS, DisplayNode, DisplayEdge, PositionedNode } from './dag-viewer.types'
+import { NODE_WIDTH, NODE_HEIGHT, NODE_COLORS, TYPE_LABELS, NODE_DESCRIPTIONS, DisplayNode, DisplayEdge, PositionedNode } from './dag-viewer.types'
 import { layoutWithDagre, layoutCircular } from './layout'
 
 interface CollapsedEdge {
@@ -43,6 +43,13 @@ export class DagViewerComponent implements OnChanges, AfterViewInit {
   NODE_HEIGHT = NODE_HEIGHT
   NODE_COLORS = NODE_COLORS
   TYPE_LABELS = TYPE_LABELS
+  NODE_DESCRIPTIONS = NODE_DESCRIPTIONS
+
+  nodeTooltip(n: PositionedNode): string {
+    if (n.nodeType === null) return n.label
+    const description = NODE_DESCRIPTIONS[n.nodeType] || ''
+    return description ? `${n.label}\n\n${description}` : n.label
+  }
 
   hidden = signal<Set<string>>(new Set())
   query = signal('')

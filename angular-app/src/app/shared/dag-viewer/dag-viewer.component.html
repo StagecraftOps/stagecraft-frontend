@@ -28,6 +28,7 @@
     <button
       *ngFor="let t of presentTypes()"
       (click)="toggleType(t)"
+      [title]="NODE_DESCRIPTIONS[t] || ''"
       class="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition"
       [ngClass]="hidden().has(t) ? 'border-zinc-200 bg-zinc-100 text-zinc-400 line-through' : 'border-zinc-300 bg-white text-zinc-700'"
     >
@@ -81,6 +82,7 @@
           <foreignObject [attr.x]="n.x" [attr.y]="n.y" [attr.width]="NODE_WIDTH" [attr.height]="NODE_HEIGHT">
             <div
               xmlns="http://www.w3.org/1999/xhtml"
+              [title]="nodeTooltip(n)"
               class="w-full h-full flex items-center justify-center text-center px-2 text-[11px] leading-tight"
               [ngClass]="n.nodeType === null ? 'text-zinc-500' : 'text-white'"
             >

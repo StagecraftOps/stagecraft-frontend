@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
-import { LucideAngularModule, Wrench, GitPullRequest, ShieldCheck, FileText, Gauge, GitCompare, ShieldAlert, Bug, ClipboardCheck, AlertCircle, Bot, ArrowUpRight } from 'lucide-angular'
+import { LucideAngularModule, Wrench, GitPullRequest, ShieldCheck, FileText, Gauge, GitCompare, ShieldAlert, Bug, ClipboardCheck, AlertCircle, Bot, ArrowUpRight, Layers } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { ApiService } from '../core/api.service'
 import { OrgService } from '../core/org.service'
@@ -25,6 +25,7 @@ const ROSTER: AgentMeta[] = [
   { key: 'governance', label: 'Governance', blurb: 'Compares pipelines to your uploaded policy documents.', icon: FileText, category: 'Quality', live: true, href: '/governance' },
   { key: 'performance_optimization', label: 'Performance Tuner', blurb: 'Finds parallelization and bottleneck fixes, drafts YAML.', icon: Gauge, category: 'Optimization', live: true, href: '/optimization' },
   { key: 'drift_detector', label: 'Drift Detector', blurb: 'Flags live pipelines drifting from approved templates.', icon: GitCompare, category: 'Governance', live: true },
+  { key: 'standardization', label: 'Reuse Detector', blurb: 'Flags job logic that repeats across workflows instead of a shared action/job/workflow.', icon: Layers, category: 'Standardization', live: true, href: '/standardization' },
   { key: 'compliance_watchdog', label: 'Compliance Watchdog', blurb: 'Continuous control checks; opens PRs for missing stages.', icon: ShieldAlert, category: 'Governance', live: false },
   { key: 'vulnerability_remediation', label: 'Vulnerability Agent', blurb: 'Turns CodeQL / Dependabot / secret-scanning alerts into tracked fixes.', icon: Bug, category: 'Security', live: true, href: '/vulnerabilities' },
   { key: 'audit_evidence', label: 'Audit Evidence', blurb: 'Traverses the graph to build signed compliance reports.', icon: ClipboardCheck, category: 'Compliance', live: false },
