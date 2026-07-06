@@ -184,6 +184,35 @@ export interface ViolationFeed {
   total: number
 }
 
+export interface VulnerabilityFinding {
+  id: string
+  org_login: string
+  repo_name: string
+  fingerprint: string
+  alert_source: string
+  alert_number: number | null
+  identifier: string | null
+  severity: string | null
+  severity_in_context: string | null
+  package_name: string | null
+  description: string | null
+  blast_radius: { affected_repos?: string[]; affected_files?: string[]; method?: string } | null
+  fix_available: boolean
+  status: string
+  github_issue_number: number | null
+  github_issue_url: string | null
+  pr_url: string | null
+  rca_summary: string | null
+  html_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface VulnerabilityFindingList {
+  findings: VulnerabilityFinding[]
+  total: number
+}
+
 export interface RunsPage {
   runs: WorkflowRun[]
   total: number

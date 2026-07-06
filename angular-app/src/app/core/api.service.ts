@@ -30,6 +30,7 @@ import type {
   AgentRun,
   AgentFleetSummary,
   ViolationFeed,
+  VulnerabilityFindingList,
 } from './types'
 
 @Injectable({ providedIn: 'root' })
@@ -180,6 +181,15 @@ export class ApiService {
     if (author) params['author'] = author
     return firstValueFrom(
       this.http.get<ViolationFeed>(`${API_URL}/api/v1/audit/violations`, { params }),
+    )
+  }
+
+  async fetchVulnerabilityFindings(org: string, statusFilter?: string): Promise<VulnerabilityFindingList> {
+    const params: Record<string, string> = {}
+    if (org) params['org_login'] = org
+    if (statusFilter) params['status'] = statusFilter
+    return firstValueFrom(
+      this.http.get<VulnerabilityFindingList>(`${API_URL}/api/v1/vulnerabilities/`, { params }),
     )
   }
 

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink, RouterLinkActive } from '@angular/router'
-import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert } from 'lucide-angular'
+import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug } from 'lucide-angular'
 import { OrgService } from '../core/org.service'
 import { ThemeService } from '../core/theme.service'
 import { ApiService } from '../core/api.service'
@@ -22,7 +22,7 @@ interface NavItem {
 export class SidebarComponent {
   @Input() user: User | null = null
 
-  icons = { LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert }
+  icons = { LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug }
 
   navSections: { section: string; items: NavItem[] }[] = [
     {
@@ -47,6 +47,7 @@ export class SidebarComponent {
         { label: 'Agent Fleet', href: '/ai-crew', icon: Bot },
         { label: 'Remediation', href: '/remediation', icon: Wrench },
         { label: 'Peer Review', href: '/pr-reviews', icon: GitPullRequest },
+        { label: 'Vulnerabilities', href: '/vulnerabilities', icon: Bug },
         { label: 'Pipeline Chat', href: '/chat', icon: MessageSquare },
       ],
     },
