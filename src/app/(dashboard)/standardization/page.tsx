@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { RefreshCw, AlertTriangle, CheckCircle2, Sparkles, ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
@@ -28,6 +28,7 @@ export default function StandardizationPage() {
   const [tplName, setTplName] = useState('')
   const [tplDesc, setTplDesc] = useState('')
   const [tplYaml, setTplYaml] = useState('')
+  const [expandedDraft, setExpandedDraft] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const { currentOrg } = useOrg()
 
@@ -233,6 +234,12 @@ export default function StandardizationPage() {
                             Version drift: {d.component} ({d.workflow_version} vs. template {d.template_version})
                           </p>
                         ))}
+                        {diff.diff_summary.narrative && (
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 italic flex items-start gap-1.5 pt-1 mt-1 border-t border-zinc-100 dark:border-zinc-800">
+                            <Sparkles size={11} className="mt-0.5 shrink-0 text-amber-500" />
+                            {diff.diff_summary.narrative}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -252,22 +259,53 @@ export default function StandardizationPage() {
               <p className="text-sm text-zinc-400 py-4 text-center">No repeated patterns found yet.</p>
             ) : (
               <div className="space-y-3">
-                {patterns.map((pattern) => (
-                  <div key={pattern.id} className="border border-zinc-100 dark:border-zinc-800 rounded-md p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <Badge status="analyzed" label="Reusable candidate" />
-                      <span className="text-xs text-zinc-400">
-                        {pattern.occurrence_count} occurrences
-                      </span>
+                {patterns.map((pattern) => {
+                  const isSemantic = pattern.pattern_signature.match_type === 'semantic'
+                  const hasDraft = Boolean(pattern.pattern_signature.draft_template_yaml)
+                  const isExpanded = expandedDraft === pattern.id
+                  return (
+                    <div key={pattern.id} className="border border-zinc-100 dark:border-zinc-800 rounded-md p-3">
+                      <div className="flex items-center justify-between mb-1 gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <Badge status="analyzed" label={pattern.pattern_signature.pattern_name ?? 'Reusable candidate'} />
+                          {isSemantic && (
+                            <span
+                              title="Found by an LLM judging functionally-similar (not byte-identical) jobs as the same pattern"
+                              className="flex items-center gap-1 text-xs text-violet-600 dark:text-violet-400"
+                            >
+                              <Sparkles size={11} /> AI-detected
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-zinc-400 shrink-0">
+                          {pattern.occurrence_count} occurrences
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-300 font-mono">
+                        {pattern.pattern_signature.components.join(', ')}
+                      </p>
+                      <p className="text-xs text-zinc-400 mt-1 truncate">
+                        e.g. {pattern.example_workflow_files.slice(0, 3).join(', ')}
+                      </p>
+                      {hasDraft && (
+                        <div className="mt-2">
+                          <button
+                            onClick={() => setExpandedDraft(isExpanded ? null : pattern.id)}
+                            className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 font-medium"
+                          >
+                            {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                            {isExpanded ? 'Hide' : 'View'} drafted reusable-workflow YAML
+                          </button>
+                          {isExpanded && (
+                            <pre className="mt-2 text-xs font-mono bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-md p-3 overflow-x-auto whitespace-pre">
+                              {pattern.pattern_signature.draft_template_yaml}
+                            </pre>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-zinc-600 dark:text-zinc-300 font-mono">
-                      {pattern.pattern_signature.components.join(', ')}
-                    </p>
-                    <p className="text-xs text-zinc-400 mt-1 truncate">
-                      e.g. {pattern.example_workflow_files.slice(0, 3).join(', ')}
-                    </p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </CardContent>
