@@ -73,7 +73,10 @@ type StubEdge = { id: string; source: string; target: string; edge_type: string 
 // Normalized shapes the render pipeline consumes regardless of which level
 // (collapsed workflow-to-workflow, or drilled into one workflow's jobs) is
 // active -- nodeType: null marks a stub (external-reference) node.
-type DisplayNode = { id: string; label: string; nodeType: string | null }
+// emphasize marks a node for a visual callout regardless of search/focus
+// state -- used for a workflow with a failure attached, in the knowledge
+// graph's collapsed view (see knowledgeCollapsed below).
+type DisplayNode = { id: string; label: string; nodeType: string | null; emphasize?: boolean }
 type DisplayEdge = {
   id: string
   source_node_id: string
@@ -141,11 +144,14 @@ interface DagViewerProps {
   edges: GraphEdgeData[]
   className?: string
   // 'dependency' (default): the two-level workflow-to-workflow collapse
-  // described above. 'knowledge': the knowledge graph shares this same
-  // component but its content -- governance rules and failures connected
-  // via GOVERNS/CAUSED_BY/MEASURED_BY -- has no workflow-to-workflow
-  // concept to collapse to, so it renders every node/edge flatly instead,
-  // the same way this component worked before the two-level redesign.
+  // described above. 'knowledge': also two-level, but shaped differently --
+  // there are no workflow-to-workflow edges in the knowledge graph, every
+  // edge points from a GovernanceRule/Failure/RuntimeMetric INTO a workflow
+  // (a dense bipartite fan-in: some governance rules apply to 90+ of ~111
+  // workflows), so the collapsed level here is a plain directory of
+  // workflow nodes with a count badge and no edges at all, and drilling in
+  // shows just that one workflow's own connected rules/failures/metrics
+  // (bounded to a handful, unlike the full org-wide fan-in).
   mode?: 'dependency' | 'knowledge'
 }
 
@@ -304,22 +310,79 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     }
   }, [drilledWorkflowId, nodeById, jobsByWorkflowFile, edges])
 
+  // Knowledge-mode collapsed level: every GOVERNS/CAUSED_BY/MEASURED_BY edge
+  // points FROM a rule/failure/metric INTO a workflow -- there is no
+  // workflow-to-workflow edge to draw, so this level is a plain count per
+  // workflow rather than a structural graph (unlike the dependency graph's
+  // collapsed level, which has real workflow_run_trigger/calls_reusable
+  // edges to show).
+  const knowledgeCounts = useMemo(() => {
+    if (mode !== 'knowledge') return null
+    const counts = new Map<string, { rules: number; failures: number; metrics: number }>()
+    for (const e of edges) {
+      const target = nodeById.get(e.target_node_id)
+      if (target?.node_type !== 'workflow') continue
+      const c = counts.get(target.id) ?? { rules: 0, failures: 0, metrics: 0 }
+      if (e.edge_type === 'governs') c.rules += 1
+      else if (e.edge_type === 'caused_by') c.failures += 1
+      else if (e.edge_type === 'measured_by') c.metrics += 1
+      counts.set(target.id, c)
+    }
+    return counts
+  }, [mode, edges, nodeById])
+
+  // Knowledge-mode drilled level: one workflow's own connected
+  // rules/failures/metrics -- bounded to a handful even for a workflow one
+  // of the ~100-fanout "applies to nearly everything" rules touches, since
+  // this only shows edges targeting THIS workflow, not the rule's full
+  // org-wide fan-out.
+  const knowledgeDrilled = useMemo(() => {
+    if (mode !== 'knowledge' || !drilledWorkflowId) return null
+    const workflow = nodeById.get(drilledWorkflowId)
+    if (!workflow) return null
+    const relevantEdges = edges.filter((e) => e.target_node_id === drilledWorkflowId)
+    const sourceIds = new Set(relevantEdges.map((e) => e.source_node_id))
+    const sourceNodes = Array.from(sourceIds)
+      .map((id) => nodeById.get(id))
+      .filter((n): n is GraphNodeData => Boolean(n))
+    return { workflow, sourceNodes, edges: relevantEdges }
+  }, [mode, drilledWorkflowId, edges, nodeById])
+
   // Normalize whichever level is active into a shape the render pipeline
   // below can consume uniformly.
   const { displayNodes, displayEdges } = useMemo(() => {
     if (mode === 'knowledge') {
-      // No workflow-to-workflow concept here -- render every node/edge
-      // directly, the same flat shape this component used before the
-      // two-level dependency-graph redesign.
-      const kNodes: DisplayNode[] = nodes.map((n) => ({ id: n.id, label: n.display_name, nodeType: n.node_type }))
-      const kEdges: DisplayEdge[] = edges.map((e) => ({
-        id: e.id,
-        source_node_id: e.source_node_id,
-        target_node_id: e.target_node_id,
-        edge_type: e.edge_type,
-        confidence: e.confidence,
-      }))
-      return { displayNodes: kNodes, displayEdges: kEdges }
+      if (drilledWorkflowId && knowledgeDrilled) {
+        const kNodes: DisplayNode[] = [
+          { id: knowledgeDrilled.workflow.id, label: knowledgeDrilled.workflow.display_name, nodeType: 'workflow' },
+          ...knowledgeDrilled.sourceNodes.map((n) => ({ id: n.id, label: n.display_name, nodeType: n.node_type })),
+        ]
+        const kEdges: DisplayEdge[] = knowledgeDrilled.edges.map((e) => ({
+          id: e.id,
+          source_node_id: e.source_node_id,
+          target_node_id: e.target_node_id,
+          edge_type: e.edge_type,
+          confidence: e.confidence,
+        }))
+        return { displayNodes: kNodes, displayEdges: kEdges }
+      }
+
+      // Collapsed: a directory of workflow nodes, no edges -- see
+      // knowledgeCounts above for why there's nothing structural to draw here.
+      const kNodes: DisplayNode[] = workflowNodes.map((n) => {
+        const c = knowledgeCounts?.get(n.id)
+        const parts: string[] = []
+        if (c?.rules) parts.push(`${c.rules} rule${c.rules === 1 ? '' : 's'}`)
+        if (c?.failures) parts.push(`${c.failures} failure${c.failures === 1 ? '' : 's'}`)
+        if (c?.metrics) parts.push(`${c.metrics} metric${c.metrics === 1 ? '' : 's'}`)
+        return {
+          id: n.id,
+          label: parts.length ? `${n.display_name} — ${parts.join(', ')}` : `${n.display_name} — no data yet`,
+          nodeType: 'workflow',
+          emphasize: Boolean(c?.failures),
+        }
+      })
+      return { displayNodes: kNodes, displayEdges: [] }
     }
 
     if (drilledWorkflowId && drilled) {
@@ -359,7 +422,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
       count: e.count,
     }))
     return { displayNodes: cNodes, displayEdges: cEdges }
-  }, [mode, nodes, edges, drilledWorkflowId, drilled, collapsed, jobsByWorkflowFile])
+  }, [mode, nodes, edges, drilledWorkflowId, drilled, collapsed, jobsByWorkflowFile, workflowNodes, knowledgeCounts, knowledgeDrilled])
 
   const typeCounts = useMemo(() => {
     const m: Record<string, number> = {}
@@ -425,7 +488,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
                 padding: 8,
                 width: NODE_WIDTH,
                 opacity: q && !match ? 0.15 : 1,
-                outline: q && match ? '3px solid #fbbf24' : undefined,
+                outline: q && match ? '3px solid #fbbf24' : n.emphasize ? '3px solid #ef4444' : undefined,
               },
         }
       })
@@ -457,12 +520,14 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
 
     // Collapsed (workflow-to-workflow) view is hub-and-spoke -- circular
     // layout suits it, including when focused down to one workflow + its
-    // callers/callees (still a small hub). Drilled (one workflow's job
-    // DAG) is a genuine pipeline hierarchy with real before/after direction
-    // (needs/needs_output) -- dagre's ranked layout communicates that flow
-    // better than a ring would, focused or not. Knowledge graph has no
-    // workflow-to-workflow concept to begin with, so it always uses dagre.
-    const useCircularLayout = mode === 'dependency' && !drilledWorkflowId
+    // callers/callees (still a small hub). Drilled (one workflow's job DAG,
+    // or one workflow's own rules/failures/metrics) is a genuine hierarchy
+    // with a real center -- dagre's ranked layout communicates that better
+    // than a ring. Knowledge graph's collapsed level is a flat directory
+    // with no edges at all, which a ring displays as an evenly-spaced menu
+    // to pick from -- also better than dagre, which would arbitrarily rank
+    // 111 edge-less nodes into a meaningless single column.
+    const useCircularLayout = !drilledWorkflowId
     return {
       flowNodes: useCircularLayout ? layoutCircular(rfNodes) : layoutWithDagre(rfNodes, rfEdges),
       flowEdges: rfEdges,
@@ -491,6 +556,14 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
     (_, node) => {
       if (mode === 'knowledge') {
         const clicked = nodeById.get(node.id)
+        if (!drilledWorkflowId) {
+          if (clicked?.node_type === 'workflow') {
+            setDrilledWorkflowId(node.id)
+            setFocusId(null)
+            setQuery('')
+          }
+          return
+        }
         // external_key is `failure::{remediation_id}` (see
         // stagecraft-worker's knowledge_graph_builder.py) -- the remediation
         // page already has the full root-cause/fix/confidence analysis,
@@ -612,7 +685,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
         </div>
       </div>
 
-      {mode === 'dependency' && drilledWorkflowId && (
+      {drilledWorkflowId && (mode === 'dependency' ? drilled : knowledgeDrilled) && (
         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           <button
             onClick={() => {
@@ -625,7 +698,9 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
             All workflows
           </button>
           <span>/</span>
-          <span className="font-medium text-zinc-700 dark:text-zinc-200">{drilled?.workflow.display_name}</span>
+          <span className="font-medium text-zinc-700 dark:text-zinc-200">
+            {(mode === 'dependency' ? drilled?.workflow : knowledgeDrilled?.workflow)?.display_name}
+          </span>
         </div>
       )}
 
@@ -676,7 +751,9 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
 
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
         {mode === 'knowledge'
-          ? 'Click a node to focus on it and its direct connections. Click a red Failure node to open its full remediation analysis.'
+          ? drilledWorkflowId
+            ? 'Showing this workflow’s own governance rules, failures, and metrics. Click a red Failure node to open its full remediation analysis. Click "All workflows" to go back.'
+            : 'Click a workflow to see its governance rules, failures, and metrics. Workflows outlined in red have at least one failure.'
           : drilledWorkflowId
             ? 'Showing this workflow’s jobs and dependencies. Dashed nodes are external references to other workflows or repos — click a resolvable one to jump straight there. Click "All workflows" to go back.'
             : 'Click a workflow to see its internal jobs and dependencies. Use the type chips to hide categories, or search to highlight.'}
