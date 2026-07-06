@@ -470,8 +470,21 @@ export class DagViewerComponent implements OnChanges, AfterViewInit {
 
   onWheel(event: WheelEvent) {
     event.preventDefault()
-    const delta = event.deltaY > 0 ? -0.1 : 0.1
-    this.zoom.set(Math.min(2, Math.max(0.1, this.zoom() + delta)))
+    const el = event.currentTarget as HTMLElement
+    const rect = el.getBoundingClientRect()
+    const cursorX = event.clientX - rect.left
+    const cursorY = event.clientY - rect.top
+
+    const oldZoom = this.zoom()
+    const factor = Math.exp(-event.deltaY * 0.001)
+    const newZoom = Math.min(2, Math.max(0.05, oldZoom * factor))
+
+    const pan = this.pan()
+    const worldX = (cursorX - pan.x) / oldZoom
+    const worldY = (cursorY - pan.y) / oldZoom
+
+    this.pan.set({ x: cursorX - worldX * newZoom, y: cursorY - worldY * newZoom })
+    this.zoom.set(newZoom)
   }
 
   onMouseDown(event: MouseEvent) {
