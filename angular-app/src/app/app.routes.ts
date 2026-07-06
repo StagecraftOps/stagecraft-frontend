@@ -1,30 +1,51 @@
 import { Routes } from '@angular/router'
 import { DashboardShellComponent } from './layout/dashboard-shell.component'
+import { LandingComponent } from './landing/landing.component'
+import { AuthCallbackComponent } from './core/auth-callback.component'
+import { authGuard } from './core/auth.guard'
 import { SettingsComponent } from './pages/settings.component'
 import { RunsComponent } from './pages/runs.component'
 import { WorkflowsComponent } from './pages/workflows.component'
 import { DashboardComponent } from './pages/dashboard.component'
-import { ComingSoonComponent } from './pages/coming-soon.component'
+import { AnalyticsComponent } from './pages/analytics.component'
+import { PerformanceComponent } from './pages/performance.component'
+import { RemediationListComponent } from './pages/remediation-list.component'
+import { RemediationDetailComponent } from './pages/remediation-detail.component'
+import { PrReviewsComponent } from './pages/pr-reviews.component'
+import { GovernanceComponent } from './pages/governance.component'
+import { StandardizationComponent } from './pages/standardization.component'
+import { OptimizationComponent } from './pages/optimization.component'
+import { ChatComponent } from './pages/chat.component'
+import { RunDetailComponent } from './pages/run-detail.component'
+import { WorkflowRepoDetailComponent } from './pages/workflow-repo-detail.component'
+import { DependencyGraphComponent } from './pages/dependency-graph.component'
+import { KnowledgeGraphComponent } from './pages/knowledge-graph.component'
 
 export const routes: Routes = [
+  { path: 'api/auth/callback', component: AuthCallbackComponent },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
   {
     path: '',
     component: DashboardShellComponent,
+    canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'runs', component: RunsComponent },
+      { path: 'runs/:run_id', component: RunDetailComponent },
       { path: 'workflows', component: WorkflowsComponent },
+      { path: 'workflows/:owner/:repo', component: WorkflowRepoDetailComponent },
       { path: 'settings', component: SettingsComponent },
-      { path: 'analytics', component: ComingSoonComponent, data: { pageTitle: 'Analytics' } },
-      { path: 'performance', component: ComingSoonComponent, data: { pageTitle: 'Performance' } },
-      { path: 'dependency-graph', component: ComingSoonComponent, data: { pageTitle: 'Dependency Graph' } },
-      { path: 'remediation', component: ComingSoonComponent, data: { pageTitle: 'Remediation' } },
-      { path: 'pr-reviews', component: ComingSoonComponent, data: { pageTitle: 'Peer Review' } },
-      { path: 'chat', component: ComingSoonComponent, data: { pageTitle: 'Pipeline Chat' } },
-      { path: 'governance', component: ComingSoonComponent, data: { pageTitle: 'Governance' } },
-      { path: 'standardization', component: ComingSoonComponent, data: { pageTitle: 'Standardization' } },
-      { path: 'optimization', component: ComingSoonComponent, data: { pageTitle: 'Optimization' } },
-      { path: 'knowledge-graph', component: ComingSoonComponent, data: { pageTitle: 'Knowledge Graph' } },
+      { path: 'analytics', component: AnalyticsComponent },
+      { path: 'performance', component: PerformanceComponent },
+      { path: 'dependency-graph', component: DependencyGraphComponent },
+      { path: 'remediation', component: RemediationListComponent },
+      { path: 'remediation/:id', component: RemediationDetailComponent },
+      { path: 'pr-reviews', component: PrReviewsComponent },
+      { path: 'chat', component: ChatComponent },
+      { path: 'governance', component: GovernanceComponent },
+      { path: 'standardization', component: StandardizationComponent },
+      { path: 'optimization', component: OptimizationComponent },
+      { path: 'knowledge-graph', component: KnowledgeGraphComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
