@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&family=JetBrains+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    font-weight: 500;
+  }
+
+  body {
+    @apply bg-zinc-50 text-zinc-800 font-medium m-0;
+  }
+
+  .dark body {
+    @apply bg-zinc-950 text-zinc-100;
+  }
+
+  body,
+  body * {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .dark .app-shell .bg-white { background-color: rgb(24 24 27); }
+  .dark .app-shell .bg-zinc-50 { background-color: rgb(9 9 11); }
+  .dark .app-shell .bg-zinc-100 { background-color: rgb(39 39 42); }
+  .dark .app-shell .text-zinc-900 { color: rgb(244 244 245); }
+  .dark .app-shell .text-zinc-800 { color: rgb(228 228 231); }
+  .dark .app-shell .text-zinc-700 { color: rgb(212 212 216); }
+  .dark .app-shell .text-zinc-600 { color: rgb(161 161 170); }
+  .dark .app-shell .border-zinc-200 { border-color: rgb(39 39 42); }
+  .dark .app-shell .border-zinc-100 { border-color: rgb(39 39 42); }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-200 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-300;
+  }
+}
+
+@layer utilities {
+  .font-serif-display {
+    font-family: 'Instrument Serif', Georgia, serif;
+  }
+
+  .font-code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
