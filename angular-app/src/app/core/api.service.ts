@@ -27,6 +27,8 @@ import type {
   ComplianceFinding,
   OptimizationRecommendation,
   SimulationRun,
+  AgentRun,
+  AgentFleetSummary,
 } from './types'
 
 @Injectable({ providedIn: 'root' })
@@ -152,6 +154,23 @@ export class ApiService {
       this.http.get<{ reviews: PRReview[]; total: number }>(`${API_URL}/api/v1/pr-reviews/`),
     )
     return data.reviews
+  }
+
+  async fetchAgentFleetSummary(org: string): Promise<AgentFleetSummary> {
+    const params: Record<string, string> = org ? { org_login: org } : {}
+    return firstValueFrom(
+      this.http.get<AgentFleetSummary>(`${API_URL}/api/v1/agent-runs/summary`, { params }),
+    )
+  }
+
+  async fetchAgentRuns(org: string, agentName?: string): Promise<AgentRun[]> {
+    const params: Record<string, string> = {}
+    if (org) params['org_login'] = org
+    if (agentName) params['agent_name'] = agentName
+    const data = await firstValueFrom(
+      this.http.get<{ runs: AgentRun[]; total: number }>(`${API_URL}/api/v1/agent-runs/`, { params }),
+    )
+    return data.runs
   }
 
   fetchPRReview(id: string): Promise<PRReview> {
