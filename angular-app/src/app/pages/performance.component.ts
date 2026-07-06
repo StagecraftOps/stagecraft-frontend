@@ -31,7 +31,7 @@ export class PerformanceComponent {
 
   constructor(public org: OrgService, private api: ApiService) {
     effect(() => {
-      if (this.org.currentOrg()) this.load()
+      if (this.org.currentOrg()) queueMicrotask(() => this.load())
     })
   }
 

@@ -37,6 +37,7 @@
   </div>
 
   <div
+    #viewport
     [ngClass]="expanded() ? 'w-full flex-1 rounded-lg border border-zinc-200 overflow-hidden relative' : 'h-[calc(100vh-260px)] min-h-[560px] w-full rounded-lg border border-zinc-200 overflow-hidden relative'"
     (wheel)="onWheel($event)"
     (mousedown)="onMouseDown($event)"
@@ -46,7 +47,7 @@
     style="cursor: grab; background: radial-gradient(circle, #e4e4e7 1px, transparent 1px); background-size: 20px 20px;"
   >
     <svg class="w-full h-full">
-      <g [attr.transform]="'translate(' + (pan().x + 600) + ',' + (pan().y + 400) + ') scale(' + zoom() + ')'">
+      <g [attr.transform]="'translate(' + pan().x + ',' + pan().y + ') scale(' + zoom() + ')'">
         <path
           *ngFor="let e of visibleData().edges"
           [attr.d]="edgePath(e)"

@@ -29,7 +29,7 @@ export class DashboardComponent {
 
   constructor(public org: OrgService, private api: ApiService) {
     effect(() => {
-      if (this.org.currentOrg()) this.load()
+      if (this.org.currentOrg()) queueMicrotask(() => this.load())
     })
     this.api.fetchCurrentUser().then((u) => this.user.set(u)).catch(() => {})
   }
