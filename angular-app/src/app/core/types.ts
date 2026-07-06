@@ -135,6 +135,38 @@ export interface PRReview {
   updated_at: string
 }
 
+export interface AgentRun {
+  id: string
+  org_login: string
+  repo_name: string | null
+  agent_name: string
+  github_run_id: string | null
+  outcome: string
+  summary: string | null
+  gaps_found: number
+  prs_opened: string[] | null
+  artifacts: string[] | null
+  conditions_evaluated: Record<string, unknown>[] | null
+  evidence: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AgentSummary {
+  agent_name: string
+  total_runs: number
+  last_run_at: string | null
+  last_outcome: string | null
+  gaps_found: number
+  prs_opened: number
+  failure_runs: number
+}
+
+export interface AgentFleetSummary {
+  agents: AgentSummary[]
+  total_runs: number
+}
+
 export interface RunsPage {
   runs: WorkflowRun[]
   total: number
