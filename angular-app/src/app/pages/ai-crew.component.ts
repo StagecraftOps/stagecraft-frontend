@@ -24,9 +24,9 @@ const ROSTER: AgentMeta[] = [
   { key: 'compliance', label: 'Compliance', blurb: 'Audits workflows against HIPAA / PCI / SOC2 controls.', icon: ShieldCheck, category: 'Quality', live: true, href: '/governance' },
   { key: 'governance', label: 'Governance', blurb: 'Compares pipelines to your uploaded policy documents.', icon: FileText, category: 'Quality', live: true, href: '/governance' },
   { key: 'performance_optimization', label: 'Performance Tuner', blurb: 'Finds parallelization and bottleneck fixes, drafts YAML.', icon: Gauge, category: 'Optimization', live: true, href: '/optimization' },
-  { key: 'drift_detector', label: 'Drift Detector', blurb: 'Flags live pipelines drifting from approved templates.', icon: GitCompare, category: 'Governance', live: false },
+  { key: 'drift_detector', label: 'Drift Detector', blurb: 'Flags live pipelines drifting from approved templates.', icon: GitCompare, category: 'Governance', live: true },
   { key: 'compliance_watchdog', label: 'Compliance Watchdog', blurb: 'Continuous control checks; opens PRs for missing stages.', icon: ShieldAlert, category: 'Governance', live: false },
-  { key: 'vulnerability_remediation', label: 'Vulnerability Agent', blurb: 'Turns Trivy / Sonar / GHAS alerts into tracked fixes.', icon: Bug, category: 'Security', live: false },
+  { key: 'vulnerability_remediation', label: 'Vulnerability Agent', blurb: 'Turns CodeQL / Dependabot / secret-scanning alerts into tracked fixes.', icon: Bug, category: 'Security', live: true, href: '/vulnerabilities' },
   { key: 'audit_evidence', label: 'Audit Evidence', blurb: 'Traverses the graph to build signed compliance reports.', icon: ClipboardCheck, category: 'Compliance', live: false },
 ]
 
