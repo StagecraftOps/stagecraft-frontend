@@ -12,15 +12,17 @@ import type { WorkflowRun } from '../core/types'
   imports: [CommonModule, LucideAngularModule, BadgeComponent],
   template: `
     <tr (click)="goto()" class="hover:bg-zinc-50 transition-colors cursor-pointer">
-      <td *ngIf="showWorkflow" class="py-3 px-4 text-sm truncate">
-        <span class="font-medium text-zinc-800">{{ truncate(run.workflow_name || ('Run #' + run.github_run_id), 40) }}</span>
+      <td *ngIf="showWorkflow" class="py-3 px-4 text-sm overflow-hidden">
+        <div class="font-medium text-zinc-800 truncate">{{ truncate(run.workflow_name || ('Run #' + run.github_run_id), 40) }}</div>
       </td>
-      <td *ngIf="showRepo" class="py-3 px-4 text-sm text-zinc-500 truncate">{{ run.repo_name || '—' }}</td>
-      <td class="py-3 px-4 whitespace-nowrap overflow-hidden">
-        <span class="inline-flex items-center gap-1 text-xs text-zinc-500 max-w-full">
+      <td *ngIf="showRepo" class="py-3 px-4 text-sm text-zinc-500 overflow-hidden">
+        <div class="truncate">{{ run.repo_name || '—' }}</div>
+      </td>
+      <td class="py-3 px-4 overflow-hidden">
+        <div class="flex items-center gap-1 text-xs text-zinc-500">
           <lucide-angular [img]="icons.GitBranch" [size]="11" class="text-zinc-400 flex-shrink-0"></lucide-angular>
           <span class="truncate">{{ run.branch }}</span>
-        </span>
+        </div>
       </td>
       <td class="py-3 px-4 whitespace-nowrap">
         <code class="text-xs text-zinc-400 font-mono bg-zinc-50 px-1.5 py-0.5 rounded">{{ formatSha(run.head_sha) }}</code>
