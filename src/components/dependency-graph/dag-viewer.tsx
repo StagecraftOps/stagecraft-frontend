@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -157,6 +158,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
   // workflow node's id => drilled into that workflow's internal jobs.
   const [drilledWorkflowId, setDrilledWorkflowId] = useState<string | null>(null)
   const { getNodes, fitView } = useReactFlow()
+  const router = useRouter()
 
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
   const workflowNodes = useMemo(() => nodes.filter((n) => n.node_type === 'workflow'), [nodes])
@@ -487,29 +489,42 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
 
   const onNodeClick: NodeMouseHandler = useCallback(
     (_, node) => {
-      if (mode === 'dependency') {
-        if (!drilledWorkflowId) {
-          const clicked = nodeById.get(node.id)
-          if (clicked?.node_type === 'workflow') {
-            setDrilledWorkflowId(node.id)
-            setFocusId(null)
-            setQuery('')
-            return
-          }
-        } else {
-          const stub = drilled?.stubNodes.find((s) => s.id === node.id)
-          if (stub?.resolvedWorkflowId) {
-            setDrilledWorkflowId(stub.resolvedWorkflowId) // drill sideways into the referenced workflow
-            setFocusId(null)
-            setQuery('')
-            return
-          }
-          if (stub) return // inert stub (external/marketplace ref, or a service/external_repo target)
+      if (mode === 'knowledge') {
+        const clicked = nodeById.get(node.id)
+        // external_key is `failure::{remediation_id}` (see
+        // stagecraft-worker's knowledge_graph_builder.py) -- the remediation
+        // page already has the full root-cause/fix/confidence analysis,
+        // this just closes the loop from "there's a failure here" to it.
+        if (clicked?.node_type === 'failure') {
+          const remediationId = clicked.external_key.replace(/^failure::/, '')
+          router.push(`/remediation/${remediationId}`)
+          return
         }
+        setFocusId(node.id)
+        return
+      }
+
+      if (!drilledWorkflowId) {
+        const clicked = nodeById.get(node.id)
+        if (clicked?.node_type === 'workflow') {
+          setDrilledWorkflowId(node.id)
+          setFocusId(null)
+          setQuery('')
+          return
+        }
+      } else {
+        const stub = drilled?.stubNodes.find((s) => s.id === node.id)
+        if (stub?.resolvedWorkflowId) {
+          setDrilledWorkflowId(stub.resolvedWorkflowId) // drill sideways into the referenced workflow
+          setFocusId(null)
+          setQuery('')
+          return
+        }
+        if (stub) return // inert stub (external/marketplace ref, or a service/external_repo target)
       }
       setFocusId(node.id) // existing focus-neighbors behavior, scoped within the active level
     },
-    [mode, drilledWorkflowId, nodeById, drilled],
+    [mode, drilledWorkflowId, nodeById, drilled, router],
   )
 
   const toggleType = (t: string) =>
@@ -661,7 +676,7 @@ function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
 
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
         {mode === 'knowledge'
-          ? 'Click any node to focus on it and its direct connections. Use the type chips to hide categories, or search to highlight.'
+          ? 'Click a node to focus on it and its direct connections. Click a red Failure node to open its full remediation analysis.'
           : drilledWorkflowId
             ? 'Showing this workflow’s jobs and dependencies. Dashed nodes are external references to other workflows or repos — click a resolvable one to jump straight there. Click "All workflows" to go back.'
             : 'Click a workflow to see its internal jobs and dependencies. Use the type chips to hide categories, or search to highlight.'}
