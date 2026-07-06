@@ -214,6 +214,28 @@ export interface VulnerabilityFindingList {
   total: number
 }
 
+export interface ApplicationContext {
+  id: string
+  org_login: string
+  repo_name: string
+  app_name: string | null
+  language: string | null
+  framework: string | null
+  regulatory_scope: string[] | null
+  data_classification: string | null
+  risk_tier: string | null
+  team_owner: string | null
+  security_contact: string | null
+  source: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ApplicationContextList {
+  contexts: ApplicationContext[]
+  total: number
+}
+
 export interface RunsPage {
   runs: WorkflowRun[]
   total: number

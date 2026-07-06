@@ -1,10 +1,9 @@
 import { Component, effect, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
-import { LucideAngularModule, GitBranch, Activity, XCircle, Bot, AlertCircle, ExternalLink } from 'lucide-angular'
+import { LucideAngularModule, GitBranch, Activity, XCircle, Bot, AlertCircle, ExternalLink, Layers, ShieldAlert, Bug } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { BadgeComponent } from '../shared/badge.component'
-import { RunRowComponent } from '../shared/run-row.component'
 import { ApiService } from '../core/api.service'
 import { OrgService } from '../core/org.service'
 import { truncate, formatRelativeTime } from '../core/utils'
@@ -13,11 +12,11 @@ import type { WorkflowRun, Remediation, User } from '../core/types'
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, PageHeaderComponent, BadgeComponent, RunRowComponent],
+  imports: [CommonModule, RouterLink, LucideAngularModule, PageHeaderComponent, BadgeComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
-  icons = { GitBranch, Activity, XCircle, Bot, AlertCircle, ExternalLink }
+  icons = { GitBranch, Activity, XCircle, Bot, AlertCircle, ExternalLink, Layers, ShieldAlert, Bug }
   truncate = truncate
   formatRelativeTime = formatRelativeTime
 
@@ -25,6 +24,9 @@ export class DashboardComponent {
   workflows = signal<{ length: number }>({ length: 0 })
   recentRuns = signal<WorkflowRun[]>([])
   remediations = signal<Remediation[]>([])
+  monitoredApplications = signal(0)
+  agentFlags = signal(0)
+  openVulnerabilities = signal(0)
   isLoading = signal(true)
 
   constructor(public org: OrgService, private api: ApiService) {
@@ -37,14 +39,20 @@ export class DashboardComponent {
   async load() {
     this.isLoading.set(true)
     try {
-      const [workflows, runsPage, remediations] = await Promise.all([
+      const [workflows, runsPage, remediations, appContexts, fleetSummary, vulns] = await Promise.all([
         this.api.fetchWorkflowsByOrg(this.org.currentOrg()),
         this.api.fetchRuns({ limit: 10 }),
         this.api.fetchRemediations(),
+        this.api.fetchApplicationContexts(this.org.currentOrg()),
+        this.api.fetchAgentFleetSummary(this.org.currentOrg()),
+        this.api.fetchVulnerabilityFindings(this.org.currentOrg(), 'open'),
       ])
       this.workflows.set({ length: workflows.length })
       this.recentRuns.set(runsPage.runs)
       this.remediations.set(remediations)
+      this.monitoredApplications.set(appContexts.total)
+      this.agentFlags.set(fleetSummary.agents.reduce((sum, a) => sum + a.gaps_found, 0))
+      this.openVulnerabilities.set(vulns.total)
     } finally {
       this.isLoading.set(false)
     }
@@ -74,6 +82,6 @@ export class DashboardComponent {
   }
 
   recentRemediations(): Remediation[] {
-    return this.remediations().slice(0, 3)
+    return this.remediations().slice(0, 6)
   }
 }

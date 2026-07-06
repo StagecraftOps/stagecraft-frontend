@@ -31,6 +31,7 @@ import type {
   AgentFleetSummary,
   ViolationFeed,
   VulnerabilityFindingList,
+  ApplicationContextList,
 } from './types'
 
 @Injectable({ providedIn: 'root' })
@@ -190,6 +191,13 @@ export class ApiService {
     if (statusFilter) params['status'] = statusFilter
     return firstValueFrom(
       this.http.get<VulnerabilityFindingList>(`${API_URL}/api/v1/vulnerabilities/`, { params }),
+    )
+  }
+
+  async fetchApplicationContexts(org: string): Promise<ApplicationContextList> {
+    const params: Record<string, string> = org ? { org_login: org } : {}
+    return firstValueFrom(
+      this.http.get<ApplicationContextList>(`${API_URL}/api/v1/application-contexts/`, { params }),
     )
   }
 
