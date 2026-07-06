@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink, ActivatedRoute } from '@angular/router'
-import { LucideAngularModule, ArrowLeft, ExternalLink, Bot, AlertCircle, CheckCircle2, Clock, GitPullRequest, Copy, Check, Loader2 } from 'lucide-angular'
+import { LucideAngularModule, ArrowLeft, ExternalLink, Bot, AlertCircle, CheckCircle2, Clock, GitPullRequest, Copy, Check, Loader2, Code2 } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { BadgeComponent } from '../shared/badge.component'
 import { ApiService } from '../core/api.service'
@@ -16,7 +16,7 @@ import type { Remediation } from '../core/types'
   templateUrl: './remediation-detail.component.html',
 })
 export class RemediationDetailComponent implements OnInit, OnDestroy {
-  icons = { ArrowLeft, ExternalLink, Bot, AlertCircle, CheckCircle2, Clock, GitPullRequest, Copy, Check, Loader2 }
+  icons = { ArrowLeft, ExternalLink, Bot, AlertCircle, CheckCircle2, Clock, GitPullRequest, Copy, Check, Loader2, Code2 }
   formatDate = formatDate
   formatRelativeTime = formatRelativeTime
 

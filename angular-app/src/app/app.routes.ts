@@ -23,6 +23,7 @@ import { KnowledgeGraphComponent } from './pages/knowledge-graph.component'
 import { AiCrewComponent } from './pages/ai-crew.component'
 import { AuditComponent } from './pages/audit.component'
 import { VulnerabilitiesComponent } from './pages/vulnerabilities.component'
+import { ApplicationContextComponent } from './pages/application-context.component'
 
 export const routes: Routes = [
   { path: 'api/auth/callback', component: AuthCallbackComponent },
@@ -48,6 +49,7 @@ export const routes: Routes = [
       { path: 'remediation/:id', component: RemediationDetailComponent },
       { path: 'pr-reviews', component: PrReviewsComponent },
       { path: 'chat', component: ChatComponent },
+      { path: 'application-context', component: ApplicationContextComponent },
       { path: 'governance', component: GovernanceComponent },
       { path: 'standardization', component: StandardizationComponent },
       { path: 'optimization', component: OptimizationComponent },

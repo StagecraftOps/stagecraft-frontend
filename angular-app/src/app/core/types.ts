@@ -64,6 +64,8 @@ export interface Remediation {
   root_cause: string
   suggested_yaml: string | null
   original_yaml: string | null
+  likely_code_level: boolean
+  code_level_reasoning: string | null
   pr_url: string | null
   pr_number: number | null
   pr_branch: string | null

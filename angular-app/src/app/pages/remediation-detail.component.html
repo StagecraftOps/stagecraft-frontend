@@ -93,7 +93,19 @@
         </div>
       </div>
 
-      <div *ngIf="isAnalyzed() && !hasSuggestedYaml()" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
+      <div *ngIf="rem.likely_code_level" class="bg-white border border-zinc-200 rounded-lg shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
+        <div class="p-5">
+          <div class="flex items-start gap-3 p-4 bg-violet-50 border border-violet-200 rounded-lg dark:bg-violet-500/10 dark:border-violet-500/20">
+            <lucide-angular [img]="icons.Code2" [size]="16" class="text-violet-600 flex-shrink-0 mt-0.5"></lucide-angular>
+            <div>
+              <p class="text-sm font-medium text-violet-900 mb-1 dark:text-violet-300">Likely an application code issue, not a pipeline fix</p>
+              <p class="text-sm text-violet-800 leading-relaxed dark:text-violet-200">{{ rem.code_level_reasoning || 'This failure appears to stem from the application\'s own code or repository content, not the CI configuration -- no workflow YAML change applies here.' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="isAnalyzed() && !hasSuggestedYaml() && !rem.likely_code_level" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
         <div class="p-5">
           <div class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-100 rounded-lg">
             <lucide-angular [img]="icons.AlertCircle" [size]="16" class="text-amber-500 flex-shrink-0 mt-0.5"></lucide-angular>
@@ -117,7 +129,7 @@
         </div>
       </div>
 
-      <div *ngIf="isFailed()" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
+      <div *ngIf="isFailed() && !rem.likely_code_level" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
         <div class="p-5">
           <div class="flex items-start gap-3 p-4 bg-rose-50 border border-rose-100 rounded-lg">
             <lucide-angular [img]="icons.AlertCircle" [size]="16" class="text-rose-500 flex-shrink-0 mt-0.5"></lucide-angular>

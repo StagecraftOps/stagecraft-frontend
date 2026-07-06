@@ -32,6 +32,7 @@ import type {
   ViolationFeed,
   VulnerabilityFindingList,
   ApplicationContextList,
+  ApplicationContext,
 } from './types'
 
 @Injectable({ providedIn: 'root' })
@@ -198,6 +199,40 @@ export class ApiService {
     const params: Record<string, string> = org ? { org_login: org } : {}
     return firstValueFrom(
       this.http.get<ApplicationContextList>(`${API_URL}/api/v1/application-contexts/`, { params }),
+    )
+  }
+
+  uploadApplicationContext(org: string, repo: string, file: File): Promise<ApplicationContext> {
+    const formData = new FormData()
+    formData.append('org_login', org)
+    formData.append('repo_name', repo)
+    formData.append('file', file)
+    return firstValueFrom(
+      this.http.post<ApplicationContext>(`${API_URL}/api/v1/application-contexts/upload`, formData),
+    )
+  }
+
+  createApplicationContext(
+    org: string,
+    repo: string,
+    body: {
+      app_name?: string
+      language?: string
+      framework?: string
+      regulatory_scope?: string[]
+      data_classification?: string
+      risk_tier?: string
+      team_owner?: string
+      security_contact?: string
+    },
+  ): Promise<ApplicationContext> {
+    return firstValueFrom(
+      this.http.post<ApplicationContext>(`${API_URL}/api/v1/application-contexts/`, {
+        org_login: org,
+        repo_name: repo,
+        source: 'manual',
+        ...body,
+      }),
     )
   }
 
