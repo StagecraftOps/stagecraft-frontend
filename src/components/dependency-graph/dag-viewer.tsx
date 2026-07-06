@@ -139,9 +139,16 @@ interface DagViewerProps {
   nodes: GraphNodeData[]
   edges: GraphEdgeData[]
   className?: string
+  // 'dependency' (default): the two-level workflow-to-workflow collapse
+  // described above. 'knowledge': the knowledge graph shares this same
+  // component but its content -- governance rules and failures connected
+  // via GOVERNS/CAUSED_BY/MEASURED_BY -- has no workflow-to-workflow
+  // concept to collapse to, so it renders every node/edge flatly instead,
+  // the same way this component worked before the two-level redesign.
+  mode?: 'dependency' | 'knowledge'
 }
 
-function DagViewerInner({ nodes, edges }: DagViewerProps) {
+function DagViewerInner({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [query, setQuery] = useState('')
   const [focusId, setFocusId] = useState<string | null>(null)
@@ -298,6 +305,21 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
   // Normalize whichever level is active into a shape the render pipeline
   // below can consume uniformly.
   const { displayNodes, displayEdges } = useMemo(() => {
+    if (mode === 'knowledge') {
+      // No workflow-to-workflow concept here -- render every node/edge
+      // directly, the same flat shape this component used before the
+      // two-level dependency-graph redesign.
+      const kNodes: DisplayNode[] = nodes.map((n) => ({ id: n.id, label: n.display_name, nodeType: n.node_type }))
+      const kEdges: DisplayEdge[] = edges.map((e) => ({
+        id: e.id,
+        source_node_id: e.source_node_id,
+        target_node_id: e.target_node_id,
+        edge_type: e.edge_type,
+        confidence: e.confidence,
+      }))
+      return { displayNodes: kNodes, displayEdges: kEdges }
+    }
+
     if (drilledWorkflowId && drilled) {
       const dNodes: DisplayNode[] = [
         ...drilled.internalNodes.map((n) => ({ id: n.id, label: n.display_name, nodeType: n.node_type })),
@@ -335,7 +357,7 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
       count: e.count,
     }))
     return { displayNodes: cNodes, displayEdges: cEdges }
-  }, [drilledWorkflowId, drilled, collapsed, jobsByWorkflowFile])
+  }, [mode, nodes, edges, drilledWorkflowId, drilled, collapsed, jobsByWorkflowFile])
 
   const typeCounts = useMemo(() => {
     const m: Record<string, number> = {}
@@ -436,13 +458,14 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
     // callers/callees (still a small hub). Drilled (one workflow's job
     // DAG) is a genuine pipeline hierarchy with real before/after direction
     // (needs/needs_output) -- dagre's ranked layout communicates that flow
-    // better than a ring would, focused or not.
-    const useCircularLayout = !drilledWorkflowId
+    // better than a ring would, focused or not. Knowledge graph has no
+    // workflow-to-workflow concept to begin with, so it always uses dagre.
+    const useCircularLayout = mode === 'dependency' && !drilledWorkflowId
     return {
       flowNodes: useCircularLayout ? layoutCircular(rfNodes) : layoutWithDagre(rfNodes, rfEdges),
       flowEdges: rfEdges,
     }
-  }, [displayNodes, displayEdges, hidden, query, focusId, neighborsOf, drilledWorkflowId])
+  }, [displayNodes, displayEdges, hidden, query, focusId, neighborsOf, drilledWorkflowId, mode])
 
   // Re-fit the viewport whenever the visible set changes (filter/focus/
   // drill), so the user always lands on a framed view instead of an
@@ -464,27 +487,29 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
 
   const onNodeClick: NodeMouseHandler = useCallback(
     (_, node) => {
-      if (!drilledWorkflowId) {
-        const clicked = nodeById.get(node.id)
-        if (clicked?.node_type === 'workflow') {
-          setDrilledWorkflowId(node.id)
-          setFocusId(null)
-          setQuery('')
-          return
+      if (mode === 'dependency') {
+        if (!drilledWorkflowId) {
+          const clicked = nodeById.get(node.id)
+          if (clicked?.node_type === 'workflow') {
+            setDrilledWorkflowId(node.id)
+            setFocusId(null)
+            setQuery('')
+            return
+          }
+        } else {
+          const stub = drilled?.stubNodes.find((s) => s.id === node.id)
+          if (stub?.resolvedWorkflowId) {
+            setDrilledWorkflowId(stub.resolvedWorkflowId) // drill sideways into the referenced workflow
+            setFocusId(null)
+            setQuery('')
+            return
+          }
+          if (stub) return // inert stub (external/marketplace ref, or a service/external_repo target)
         }
-      } else {
-        const stub = drilled?.stubNodes.find((s) => s.id === node.id)
-        if (stub?.resolvedWorkflowId) {
-          setDrilledWorkflowId(stub.resolvedWorkflowId) // drill sideways into the referenced workflow
-          setFocusId(null)
-          setQuery('')
-          return
-        }
-        if (stub) return // inert stub (external/marketplace ref, or a service/external_repo target)
       }
       setFocusId(node.id) // existing focus-neighbors behavior, scoped within the active level
     },
-    [drilledWorkflowId, nodeById, drilled],
+    [mode, drilledWorkflowId, nodeById, drilled],
   )
 
   const toggleType = (t: string) =>
@@ -572,7 +597,7 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
         </div>
       </div>
 
-      {drilledWorkflowId && (
+      {mode === 'dependency' && drilledWorkflowId && (
         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           <button
             onClick={() => {
@@ -635,18 +660,20 @@ function DagViewerInner({ nodes, edges }: DagViewerProps) {
       </div>
 
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        {drilledWorkflowId
-          ? 'Showing this workflow’s jobs and dependencies. Dashed nodes are external references to other workflows or repos — click a resolvable one to jump straight there. Click "All workflows" to go back.'
-          : 'Click a workflow to see its internal jobs and dependencies. Use the type chips to hide categories, or search to highlight.'}
+        {mode === 'knowledge'
+          ? 'Click any node to focus on it and its direct connections. Use the type chips to hide categories, or search to highlight.'
+          : drilledWorkflowId
+            ? 'Showing this workflow’s jobs and dependencies. Dashed nodes are external references to other workflows or repos — click a resolvable one to jump straight there. Click "All workflows" to go back.'
+            : 'Click a workflow to see its internal jobs and dependencies. Use the type chips to hide categories, or search to highlight.'}
       </p>
     </div>
   )
 }
 
-export function DagViewer({ nodes, edges }: DagViewerProps) {
+export function DagViewer({ nodes, edges, mode = 'dependency' }: DagViewerProps) {
   return (
     <ReactFlowProvider>
-      <DagViewerInner nodes={nodes} edges={edges} />
+      <DagViewerInner nodes={nodes} edges={edges} mode={mode} />
     </ReactFlowProvider>
   )
 }
