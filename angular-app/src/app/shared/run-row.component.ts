@@ -12,16 +12,14 @@ import type { WorkflowRun } from '../core/types'
   imports: [CommonModule, LucideAngularModule, BadgeComponent],
   template: `
     <tr (click)="goto()" class="hover:bg-zinc-50 transition-colors cursor-pointer">
-      <td *ngIf="showWorkflow" class="py-3 px-4 text-sm whitespace-nowrap">
-        <span class="font-medium text-zinc-800 truncate max-w-[220px] inline-block align-bottom">{{ truncate(run.workflow_name || ('Run #' + run.github_run_id), 40) }}</span>
+      <td *ngIf="showWorkflow" class="py-3 px-4 text-sm truncate">
+        <span class="font-medium text-zinc-800">{{ truncate(run.workflow_name || ('Run #' + run.github_run_id), 40) }}</span>
       </td>
-      <td *ngIf="showRepo" class="py-3 px-4 text-sm text-zinc-500 whitespace-nowrap">
-        <span class="truncate max-w-[160px] inline-block align-bottom">{{ run.repo_name || '—' }}</span>
-      </td>
-      <td class="py-3 px-4 whitespace-nowrap">
-        <span class="inline-flex items-center gap-1 text-xs text-zinc-500">
-          <lucide-angular [img]="icons.GitBranch" [size]="11" class="text-zinc-400"></lucide-angular>
-          <span class="truncate max-w-[120px]">{{ run.branch }}</span>
+      <td *ngIf="showRepo" class="py-3 px-4 text-sm text-zinc-500 truncate">{{ run.repo_name || '—' }}</td>
+      <td class="py-3 px-4 whitespace-nowrap overflow-hidden">
+        <span class="inline-flex items-center gap-1 text-xs text-zinc-500 max-w-full">
+          <lucide-angular [img]="icons.GitBranch" [size]="11" class="text-zinc-400 flex-shrink-0"></lucide-angular>
+          <span class="truncate">{{ run.branch }}</span>
         </span>
       </td>
       <td class="py-3 px-4 whitespace-nowrap">
