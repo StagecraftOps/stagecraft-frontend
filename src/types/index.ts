@@ -208,8 +208,7 @@ export interface LongestWorkflowEntry {
 }
 
 export interface RunnerBreakdownEntry {
-  // null = no runner was ever assigned (job still queued or cancelled
-  // before pickup) -- a real bucket, not missing data.
+  
   runner_labels: string[] | null
   job_count: number
   avg_duration_seconds: number | null
@@ -237,9 +236,7 @@ export interface TemplateDiffSummary {
   extra_components: string[]
   version_drift: VersionDrift[]
   adoption_score: number
-  // LLM layer (WHY the gap matters, not just what it is) -- absent when the
-  // diff is fully compliant (nothing to narrate) or the Bedrock call failed
-  // (best-effort, see app.tasks.standardization.run_template_diff_task).
+  
   narrative?: string
 }
 
@@ -256,12 +253,7 @@ export interface TemplateDiff {
 
 export interface PatternClusterSignature {
   components: string[]
-  // 'exact' = found by byte-identical signature hashing (find_repeated_patterns).
-  // 'semantic' = jobs whose signatures were similar but not identical, an LLM
-  // judged them the same pattern anyway (find_near_miss_groups +
-  // BedrockRemediationClient.judge_pattern_cluster) -- only 'semantic'
-  // clusters carry pattern_name/draft_template_yaml, since exact clusters
-  // are never sent through that LLM judgment step.
+  
   match_type?: 'exact' | 'semantic'
   pattern_name?: string
   draft_template_yaml?: string

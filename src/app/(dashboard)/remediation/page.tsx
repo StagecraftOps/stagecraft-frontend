@@ -19,7 +19,7 @@ export default function RemediationPage() {
         description="AI-generated fixes for failing pipelines, powered by AWS Bedrock."
       />
 
-      {/* Error */}
+      {}
       {error && (
         <div className="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
           <AlertCircle size={16} />
@@ -27,7 +27,7 @@ export default function RemediationPage() {
         </div>
       )}
 
-      {/* Table */}
+      {}
       <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>

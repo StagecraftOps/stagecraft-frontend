@@ -54,7 +54,7 @@ export function RunsPreviewSection() {
     <section id="runs" ref={ref} className="py-24 lg:py-32 bg-zinc-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Text */}
+          {}
           <div>
             <span className="inline-flex items-center gap-3 text-sm font-code text-zinc-400 mb-6">
               <span className="w-8 h-px bg-zinc-300" />
@@ -93,14 +93,14 @@ export function RunsPreviewSection() {
             </div>
           </div>
 
-          {/* Preview table */}
+          {}
           <div
             className={`transition-all duration-700 delay-200 ${
               visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
             <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
-              {/* Toolbar mockup */}
+              {}
               <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 bg-zinc-50">
                 <div className="h-7 w-28 bg-zinc-200 rounded-md animate-pulse" />
                 <div className="h-7 w-24 bg-zinc-200 rounded-md animate-pulse" />
@@ -108,7 +108,7 @@ export function RunsPreviewSection() {
                 <span className="ml-auto text-xs text-zinc-400 font-code">6 runs</span>
               </div>
 
-              {/* Rows */}
+              {}
               <div className="divide-y divide-zinc-50">
                 {mockRuns.map((run, i) => (
                   <div

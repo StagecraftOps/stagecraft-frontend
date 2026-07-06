@@ -59,8 +59,6 @@ function formatDuration(seconds: number | null | undefined): string {
 export default function AnalyticsPage() {
   const { data: analytics, isLoading, error } = useAnalytics()
 
-  // Success/failure as a share of COMPLETED runs (excludes still-running and
-  // cancelled/skipped), so the three shares actually add up and read honestly.
   const completed = analytics?.completed_runs ?? 0
   const successPct = completed ? (analytics!.success_count / completed) * 100 : 0
   const failurePct = completed ? (analytics!.failure_count / completed) * 100 : 0
@@ -77,7 +75,7 @@ export default function AnalyticsPage() {
         description="Pipeline performance metrics and AI remediation insights."
       />
 
-      {/* Error */}
+      {}
       {error && (
         <div className="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
           <AlertCircle size={16} />
@@ -85,7 +83,7 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      {/* Stats */}
+      {}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {isLoading ? (
           [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
@@ -119,7 +117,7 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        {/* Run trend line chart */}
+        {}
         <Card>
           <CardHeader>
             <CardTitle>Run Trend — Last 30 Days</CardTitle>
@@ -183,7 +181,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* Top failing repos bar chart */}
+        {}
         <Card>
           <CardHeader>
             <CardTitle>Top Failing Repositories</CardTitle>
@@ -242,7 +240,7 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* Run outcome breakdown — honest 3-way split of completed runs */}
+      {}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Run Outcomes ({completed.toLocaleString()} completed)</CardTitle>
@@ -268,7 +266,7 @@ export default function AnalyticsPage() {
         </CardContent>
       </Card>
 
-      {/* AI remediation timing — real, computed metrics */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle>AI Remediation</CardTitle>

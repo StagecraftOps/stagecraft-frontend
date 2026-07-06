@@ -179,7 +179,7 @@ export default function RemediationDetailPage() {
         Back to Remediations
       </Link>
 
-      {/* Header */}
+      {}
       <div className="mb-8">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -201,7 +201,7 @@ export default function RemediationDetailPage() {
             </div>
           </div>
 
-          {/* Actions: PR raised or Raise PR button */}
+          {}
           {isPrRaised && remediation.pr_url && (
             <a
               href={remediation.pr_url}
@@ -245,7 +245,7 @@ export default function RemediationDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Root cause */}
+          {}
           {remediation.root_cause && (
             <Card>
               <CardHeader>
@@ -262,7 +262,7 @@ export default function RemediationDetailPage() {
             </Card>
           )}
 
-          {/* Suggested YAML */}
+          {}
           {hasResult && remediation.suggested_yaml && (
             <Card>
               <CardHeader>
@@ -307,7 +307,7 @@ export default function RemediationDetailPage() {
             </Card>
           )}
 
-          {/* Analyzing placeholder */}
+          {}
           {(isPending || isAnalyzing) && (
             <Card>
               <CardContent>
@@ -345,9 +345,9 @@ export default function RemediationDetailPage() {
           )}
         </div>
 
-        {/* Sidebar */}
+        {}
         <div className="space-y-6">
-          {/* Timeline */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle>Timeline</CardTitle>
@@ -388,7 +388,7 @@ export default function RemediationDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Meta */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle>Details</CardTitle>

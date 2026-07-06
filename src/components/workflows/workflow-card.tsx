@@ -27,7 +27,7 @@ export function WorkflowCard({ workflow, lastRun, org }: WorkflowCardProps) {
   return (
     <Link href={href}>
       <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5 hover:border-zinc-300 hover:shadow-md transition-all group cursor-pointer">
-        {/* Header */}
+        {}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-zinc-400 font-medium truncate mb-1">
@@ -46,7 +46,7 @@ export function WorkflowCard({ workflow, lastRun, org }: WorkflowCardProps) {
           />
         </div>
 
-        {/* Status & meta */}
+        {}
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {displayStatus ? (

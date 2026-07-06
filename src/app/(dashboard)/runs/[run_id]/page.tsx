@@ -83,7 +83,7 @@ export default function RunDetailPage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      {/* Back */}
+      {}
       <Link
         href="/runs"
         className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 mb-6 transition-colors"
@@ -92,7 +92,7 @@ export default function RunDetailPage() {
         Back to Runs
       </Link>
 
-      {/* Header */}
+      {}
       <div className="mb-8">
         <div className="flex items-start gap-4">
           <div className="flex-1 min-w-0">
@@ -137,7 +137,7 @@ export default function RunDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Run metadata */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle>Run Details</CardTitle>
@@ -202,7 +202,7 @@ export default function RunDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Job timeline (FR-2 runtime monitoring) */}
+          {}
           {jobs.length > 0 && (
             <Card>
               <CardHeader>
@@ -214,7 +214,7 @@ export default function RunDetailPage() {
             </Card>
           )}
 
-          {/* Workflow Logs */}
+          {}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -261,9 +261,9 @@ export default function RunDetailPage() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+        {}
         <div>
-          {/* AI Remediation card */}
+          {}
           {(displayStatus === 'failure' || displayStatus === 'timed_out') && (
             <Card>
               <CardHeader>
@@ -318,7 +318,7 @@ export default function RunDetailPage() {
             </Card>
           )}
 
-          {/* Quick info */}
+          {}
           <Card className="mt-4">
             <CardHeader>
               <CardTitle>Quick Info</CardTitle>

@@ -71,9 +71,9 @@ export default function RunsPage() {
         description="Every workflow run across all repos in your organization — replacing the per-repo Actions tab."
       />
 
-      {/* Toolbar */}
+      {}
       <div className="flex items-center gap-3 flex-wrap mb-6">
-        {/* Repo filter */}
+        {}
         <select
           value={selectedRepo}
           onChange={(e) => {
@@ -90,7 +90,7 @@ export default function RunsPage() {
           ))}
         </select>
 
-        {/* Status filter */}
+        {}
         <select
           value={statusFilter}
           onChange={(e) => {
@@ -105,7 +105,7 @@ export default function RunsPage() {
           <option value="completed">Completed</option>
         </select>
 
-        {/* Conclusion filter */}
+        {}
         <select
           value={conclusionFilter}
           onChange={(e) => {
@@ -208,7 +208,7 @@ export default function RunsPage() {
         </CardContent>
       </Card>
 
-      {/* Pagination */}
+      {}
       {total > PAGE_SIZE && (
         <div className="flex items-center justify-between mt-4">
           <span className="text-xs text-zinc-400">

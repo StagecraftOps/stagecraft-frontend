@@ -160,8 +160,6 @@ export async function fetchAnalytics(): Promise<AnalyticsData> {
   return data
 }
 
-// ── Feature 3: Natural Language Pipeline Chat ─────────────────────────────
-
 export interface ChatResponse {
   answer: string
   sql?: string | null
@@ -174,8 +172,6 @@ export async function sendChatMessage(message: string): Promise<ChatResponse> {
   return data
 }
 
-// ── Feature 4: Multi-Repo Correlation ────────────────────────────────────
-
 export async function getSimilarRemediations(
   remediationId: string,
   limit = 5
@@ -186,8 +182,6 @@ export async function getSimilarRemediations(
   )
   return data
 }
-
-// ── Dependency graph (FR-1) ───────────────────────────────────────────────
 
 export async function buildDependencyGraph(
   org: string,
@@ -221,8 +215,6 @@ export async function fetchKnowledgeGraph(org: string): Promise<GraphDetail> {
 export async function buildKnowledgeGraph(org: string): Promise<void> {
   await api.post(`/api/v1/orgs/${org}/knowledge-graph/build`)
 }
-
-// ── Runtime monitoring (FR-2) ─────────────────────────────────────────────
 
 export async function fetchRunJobs(runId: string): Promise<JobRunData[]> {
   const { data } = await api.get<{ jobs: JobRunData[] }>(`/api/v1/runs/${runId}/jobs`)
@@ -261,8 +253,6 @@ export async function fetchRunnerBreakdown(org: string): Promise<RunnerBreakdown
   return data
 }
 
-// ── Standardization (FR-3/FR-4) ───────────────────────────────────────────
-
 export async function fetchTemplates(org: string): Promise<WorkflowTemplate[]> {
   const { data } = await api.get<{ templates: WorkflowTemplate[] }>(`/api/v1/orgs/${org}/templates`)
   return data.templates
@@ -298,8 +288,6 @@ export async function fetchPatternClusters(org: string): Promise<PatternCluster[
   return data.patterns
 }
 
-// ── Peer Review Agent (FR-12a) ────────────────────────────────────────────
-
 export async function fetchPRReviews(): Promise<PRReview[]> {
   const { data } = await api.get<{ reviews: PRReview[]; total: number }>('/api/v1/pr-reviews/')
   return data.reviews
@@ -309,8 +297,6 @@ export async function fetchPRReview(id: string): Promise<PRReview> {
   const { data } = await api.get<PRReview>(`/api/v1/pr-reviews/${id}`)
   return data
 }
-
-// ── Governance & compliance (FR-5/FR-6) ───────────────────────────────────
 
 export async function fetchGovernanceDocuments(org: string): Promise<GovernanceDocument[]> {
   const { data } = await api.get<{ documents: GovernanceDocument[] }>(`/api/v1/orgs/${org}/governance/documents`)
@@ -347,8 +333,6 @@ export async function fetchComplianceFindings(org: string, repo: string): Promis
   )
   return data.findings
 }
-
-// ── Performance optimization (FR-7/FR-8/FR-9) ─────────────────────────────
 
 export async function analyzeOptimization(org: string, repo: string, workflowFile: string, ref = 'main'): Promise<void> {
   await api.post(`/api/v1/orgs/${org}/repos/${repo}/optimization/analyze`, { workflow_file: workflowFile, ref })

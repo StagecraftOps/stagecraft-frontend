@@ -6,7 +6,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
-        {/* Logo */}
+        {}
         <div className="flex flex-col items-center mb-8">
           <span
             className="text-zinc-900 mb-3"
@@ -17,7 +17,7 @@ export default function LoginPage() {
           <p className="text-sm text-zinc-500">GitHub Actions intelligence</p>
         </div>
 
-        {/* Card */}
+        {}
         <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-8">
           <h2 className="text-base font-semibold text-zinc-800 text-center mb-2">
             Sign in to continue

@@ -92,7 +92,7 @@ export default function DashboardPage() {
         description="Here's what's happening across your pipelines."
       />
 
-      {/* Stats row */}
+      {}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         {workflowsLoading || orgsLoading ? (
           <>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent runs table */}
+        {}
         <div className="xl:col-span-2">
           <Card>
             <CardHeader>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Recent remediations */}
+        {}
         <div>
           <Card>
             <CardHeader>
