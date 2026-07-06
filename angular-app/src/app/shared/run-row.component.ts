@@ -10,6 +10,10 @@ import type { WorkflowRun } from '../core/types'
   selector: 'app-run-row',
   standalone: true,
   imports: [CommonModule, LucideAngularModule, BadgeComponent],
+  // Element selector emits an <app-run-row> host between <tbody> and <tr>;
+  // display:contents removes it from the box tree so the <tr> is a direct
+  // child of <tbody> and table-fixed column widths align (runs + dashboard).
+  host: { style: 'display: contents' },
   template: `
     <tr (click)="goto()" class="hover:bg-zinc-50 transition-colors cursor-pointer">
       <td *ngIf="showWorkflow" class="py-3 px-4 text-sm overflow-hidden">
