@@ -12,29 +12,31 @@ import type { WorkflowRun } from '../core/types'
   imports: [CommonModule, LucideAngularModule, BadgeComponent],
   template: `
     <tr (click)="goto()" class="hover:bg-zinc-50 transition-colors cursor-pointer">
-      <td *ngIf="showWorkflow" class="py-3 px-4 text-sm">
-        <span class="font-medium text-zinc-800">{{ truncate(run.workflow_name || ('Run #' + run.github_run_id), 40) }}</span>
+      <td *ngIf="showWorkflow" class="py-3 px-4 text-sm whitespace-nowrap">
+        <span class="font-medium text-zinc-800 truncate max-w-[220px] inline-block align-bottom">{{ truncate(run.workflow_name || ('Run #' + run.github_run_id), 40) }}</span>
       </td>
-      <td *ngIf="showRepo" class="py-3 px-4 text-sm text-zinc-500">{{ run.repo_name || '—' }}</td>
-      <td class="py-3 px-4">
+      <td *ngIf="showRepo" class="py-3 px-4 text-sm text-zinc-500 whitespace-nowrap">
+        <span class="truncate max-w-[160px] inline-block align-bottom">{{ run.repo_name || '—' }}</span>
+      </td>
+      <td class="py-3 px-4 whitespace-nowrap">
         <span class="inline-flex items-center gap-1 text-xs text-zinc-500">
           <lucide-angular [img]="icons.GitBranch" [size]="11" class="text-zinc-400"></lucide-angular>
           <span class="truncate max-w-[120px]">{{ run.branch }}</span>
         </span>
       </td>
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 whitespace-nowrap">
         <code class="text-xs text-zinc-400 font-mono bg-zinc-50 px-1.5 py-0.5 rounded">{{ formatSha(run.head_sha) }}</code>
       </td>
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 whitespace-nowrap">
         <app-badge [status]="displayStatus()"></app-badge>
       </td>
-      <td class="py-3 px-4 text-xs text-zinc-500 tabular-nums">
+      <td class="py-3 px-4 text-xs text-zinc-500 tabular-nums whitespace-nowrap">
         {{ run.started_at ? calculateDuration(run.started_at, run.completed_at) : '—' }}
       </td>
-      <td class="py-3 px-4 text-xs text-zinc-400">
+      <td class="py-3 px-4 text-xs text-zinc-400 whitespace-nowrap">
         {{ run.started_at ? formatRelativeTime(run.started_at) : '—' }}
       </td>
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 whitespace-nowrap">
         <a *ngIf="run.html_url" [href]="run.html_url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="text-zinc-400 hover:text-amber-600 transition-colors">
           <lucide-angular [img]="icons.ExternalLink" [size]="13"></lucide-angular>
         </a>
