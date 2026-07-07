@@ -1,9 +1,11 @@
 import { Component, OnInit, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { LucideAngularModule, Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network } from 'lucide-angular'
+import { FormsModule } from '@angular/forms'
+import { LucideAngularModule, Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { ApiService } from '../core/api.service'
 import { OrgService } from '../core/org.service'
+import { ApplicationService } from '../core/application.service'
 import { formatRelativeTime } from '../core/utils'
 import type { VulnerabilityFinding } from '../core/types'
 
@@ -28,14 +30,32 @@ function sourceLabel(source: string): string {
 @Component({
   selector: 'app-vulnerabilities',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, PageHeaderComponent],
   template: `
     <div class="p-8">
-      <app-page-header eyebrow="Security" title="Vulnerability Remediation" description="Findings from CodeQL, Dependabot, and any SARIF-uploading scanner (Trivy, Grype, Semgrep), triaged and de-duplicated by the Vulnerability Agent -- StageCraft governs on top of these tools, it doesn't replace them."></app-page-header>
+      <app-page-header eyebrow="Security · System Agent" title="Vulnerability RCA" description="Findings from Trivy, Sonar, CodeQL and Dependabot — root-caused, severity-escalated by application context, and de-duplicated into tracked issues. StageCraft governs on top of these scanners, it doesn't replace them."></app-page-header>
+
+      <!-- Scope filters -->
+      <div class="flex flex-wrap items-center gap-3 mb-6">
+        <div class="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <lucide-angular [img]="icons.Boxes" [size]="15" class="text-amber-500"></lucide-angular>
+          Application:
+          <span class="font-medium text-zinc-700 dark:text-zinc-200">{{ appSvc.currentApplication()?.name || 'All applications' }}</span>
+          <span class="text-xs text-zinc-400">(switch in the sidebar)</span>
+        </div>
+        <div class="inline-flex items-center gap-2">
+          <label class="text-sm text-zinc-500 dark:text-zinc-400">Repository:</label>
+          <select [ngModel]="repoFilter()" (ngModelChange)="repoFilter.set($event)"
+            class="text-sm border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="">All repositories</option>
+            <option *ngFor="let r of distinctRepos()" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+      </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ findings().length }}</div>
+          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ visibleFindings().length }}</div>
           <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Open findings</div>
         </div>
         <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
@@ -57,13 +77,13 @@ function sourceLabel(source: string): string {
         <p class="text-sm">Failed to load vulnerability findings. Check your connection.</p>
       </div>
 
-      <div *ngIf="!isLoading() && findings().length === 0" class="flex flex-col items-center justify-center py-16 text-center bg-white border border-zinc-200 rounded-lg dark:bg-zinc-900 dark:border-zinc-800">
+      <div *ngIf="!isLoading() && visibleFindings().length === 0" class="flex flex-col items-center justify-center py-16 text-center bg-white border border-zinc-200 rounded-lg dark:bg-zinc-900 dark:border-zinc-800">
         <lucide-angular [img]="icons.Bug" [size]="24" class="text-zinc-300 mb-2"></lucide-angular>
-        <p class="text-sm text-zinc-400">No vulnerability findings tracked yet. They appear here when CodeQL, Dependabot, or an uploaded SARIF scan raises an alert.</p>
+        <p class="text-sm text-zinc-400">No vulnerability findings in this scope yet. They appear here when Trivy, Sonar, CodeQL, or Dependabot raises an alert.</p>
       </div>
 
       <div class="flex flex-col gap-2">
-        <div *ngFor="let f of findings()" class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
+        <div *ngFor="let f of visibleFindings()" class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
           <div class="flex items-start gap-3">
             <div class="w-9 h-9 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 dark:bg-rose-500/10">
               <lucide-angular [img]="icons.Bug" [size]="16"></lucide-angular>
@@ -99,7 +119,7 @@ function sourceLabel(source: string): string {
   `,
 })
 export class VulnerabilitiesComponent implements OnInit {
-  icons = { Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network }
+  icons = { Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes }
   formatRelativeTime = formatRelativeTime
   severityClasses = severityClasses
   sourceLabel = sourceLabel
@@ -107,12 +127,21 @@ export class VulnerabilitiesComponent implements OnInit {
   findings = signal<VulnerabilityFinding[]>([])
   isLoading = signal(true)
   error = signal(false)
+  repoFilter = signal<string>('')
 
-  criticalCount = computed(() => this.findings().filter(f => f.severity_in_context === 'critical').length)
-  prsRaisedCount = computed(() => this.findings().filter(f => f.status === 'pr_raised').length)
-  noFixCount = computed(() => this.findings().filter(f => !f.fix_available).length)
+  distinctRepos = computed(() =>
+    Array.from(new Set(this.findings().map((f) => f.repo_name))).sort(),
+  )
+  visibleFindings = computed(() => {
+    const repo = this.repoFilter()
+    return repo ? this.findings().filter((f) => f.repo_name === repo) : this.findings()
+  })
 
-  constructor(private api: ApiService, private org: OrgService) {}
+  criticalCount = computed(() => this.visibleFindings().filter(f => f.severity_in_context === 'critical').length)
+  prsRaisedCount = computed(() => this.visibleFindings().filter(f => f.status === 'pr_raised').length)
+  noFixCount = computed(() => this.visibleFindings().filter(f => !f.fix_available).length)
+
+  constructor(private api: ApiService, private org: OrgService, public appSvc: ApplicationService) {}
 
   async ngOnInit() {
     try {
