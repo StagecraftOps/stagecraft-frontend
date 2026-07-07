@@ -93,6 +93,7 @@ export interface SkillFile {
 
 export interface CustomAgentConfig {
   agent_key: string
+  repo_name?: string
   system_prompt: string | null
   skill_files: SkillFile[]
   updated_at: string | null

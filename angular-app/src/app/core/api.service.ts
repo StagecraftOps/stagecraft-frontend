@@ -226,19 +226,31 @@ export class ApiService {
     )
   }
 
-  fetchCustomAgentConfig(org: string, agentKey: string): Promise<CustomAgentConfig> {
+  runAgenticRemediation(org: string, repo: string): Promise<{ status: string }> {
     return firstValueFrom(
-      this.http.get<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`),
+      this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/run-agentic`, {
+        org_login: org,
+        repo_name: repo,
+      }),
+    )
+  }
+
+  fetchCustomAgentConfig(org: string, agentKey: string, repoName: string = ''): Promise<CustomAgentConfig> {
+    return firstValueFrom(
+      this.http.get<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`, {
+        params: { repo_name: repoName },
+      }),
     )
   }
 
   saveCustomAgentConfig(
-    org: string, agentKey: string, systemPrompt: string | null, skillFiles: SkillFile[],
+    org: string, agentKey: string, systemPrompt: string | null, skillFiles: SkillFile[], repoName: string = '',
   ): Promise<CustomAgentConfig> {
     return firstValueFrom(
       this.http.put<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`, {
         system_prompt: systemPrompt,
         skill_files: skillFiles,
+        repo_name: repoName,
       }),
     )
   }
