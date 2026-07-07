@@ -86,6 +86,11 @@ export interface RunTrendPoint {
   failed: number
 }
 
+export interface TopFailingWorkflow {
+  workflow: string
+  count: number
+}
+
 export interface AnalyticsData {
   total_runs: number
   completed_runs: number
@@ -94,10 +99,16 @@ export interface AnalyticsData {
   other_count: number
   failure_rate: number
   success_rate: number
+  runs_per_day: number
   remediations_raised: number
   avg_analysis_seconds: number | null
   avg_time_to_pr_seconds: number | null
+  mttr_seconds: number | null
+  mttd_seconds: number | null
+  open_vulns_total: number
+  open_vulns_by_severity: Record<string, number>
   top_failing_repos: TopFailingRepo[]
+  top_failing_workflows: TopFailingWorkflow[]
   run_trend: RunTrendPoint[]
 }
 
@@ -129,6 +140,7 @@ export interface PRReview {
   repo_name: string
   pr_number: number
   pr_url: string
+  author: string | null
   risk_score: number | null
   findings: string[] | null
   review_summary: string | null

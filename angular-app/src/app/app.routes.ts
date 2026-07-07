@@ -56,7 +56,8 @@ export const routes: Routes = [
       { path: 'standardization', component: StandardizationComponent },
       { path: 'optimization', component: OptimizationComponent },
       { path: 'knowledge-graph', component: KnowledgeGraphComponent },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'insights', redirectTo: 'analytics', pathMatch: 'full' },
+      { path: '', redirectTo: 'analytics', pathMatch: 'full' },
     ],
   },
 ]

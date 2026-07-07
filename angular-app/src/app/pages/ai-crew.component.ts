@@ -1,12 +1,14 @@
 import { Component, OnInit, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
-import { LucideAngularModule, Wrench, GitPullRequest, ShieldCheck, FileText, Gauge, GitCompare, ShieldAlert, Bug, ClipboardCheck, AlertCircle, Bot, ArrowUpRight, Layers } from 'lucide-angular'
+import { LucideAngularModule, Wrench, GitPullRequest, ShieldCheck, FileText, Gauge, GitCompare, ShieldAlert, Bug, ClipboardCheck, AlertCircle, Bot, ArrowUpRight, Layers, ShieldX } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { ApiService } from '../core/api.service'
 import { OrgService } from '../core/org.service'
 import { formatRelativeTime } from '../core/utils'
 import type { AgentSummary } from '../core/types'
+
+type AgentKind = 'system' | 'custom'
 
 interface AgentMeta {
   key: string
@@ -14,21 +16,26 @@ interface AgentMeta {
   blurb: string
   icon: any
   category: string
+  kind: AgentKind
   live: boolean
   href?: string
 }
 
+// System agents run inside StageCraft. Custom agents are (or will be) published into
+// the customer's GitHub repos.
 const ROSTER: AgentMeta[] = [
-  { key: 'failure_rca', label: 'Self-Healing RCA', blurb: 'Classifies pipeline failures and proposes a fix PR.', icon: Wrench, category: 'Remediation', live: true, href: '/remediation' },
-  { key: 'peer_review', label: 'Peer Review', blurb: 'Reviews PRs for removed gates, secrets, broad permissions.', icon: GitPullRequest, category: 'Review', live: true, href: '/pr-reviews' },
-  { key: 'compliance', label: 'Compliance', blurb: 'Audits workflows against HIPAA / PCI / SOC2 controls.', icon: ShieldCheck, category: 'Quality', live: true, href: '/governance' },
-  { key: 'governance', label: 'Governance', blurb: 'Compares pipelines to your uploaded policy documents.', icon: FileText, category: 'Quality', live: true, href: '/governance' },
-  { key: 'performance_optimization', label: 'Performance Tuner', blurb: 'Finds parallelization and bottleneck fixes, drafts YAML.', icon: Gauge, category: 'Optimization', live: true, href: '/optimization' },
-  { key: 'drift_detector', label: 'Drift Detector', blurb: 'Flags live pipelines drifting from approved templates.', icon: GitCompare, category: 'Governance', live: true },
-  { key: 'standardization', label: 'Reuse Detector', blurb: 'Flags job logic that repeats across workflows instead of a shared action/job/workflow.', icon: Layers, category: 'Standardization', live: true, href: '/standardization' },
-  { key: 'compliance_watchdog', label: 'Compliance Watchdog', blurb: 'Continuous control checks; opens PRs for missing stages.', icon: ShieldAlert, category: 'Governance', live: false },
-  { key: 'vulnerability_remediation', label: 'Vulnerability Agent', blurb: 'Turns CodeQL / Dependabot / secret-scanning alerts into tracked fixes.', icon: Bug, category: 'Security', live: true, href: '/vulnerabilities' },
-  { key: 'audit_evidence', label: 'Audit Evidence', blurb: 'Traverses the graph to build signed compliance reports.', icon: ClipboardCheck, category: 'Compliance', live: false },
+  { key: 'failure_rca', label: 'Self-Healing RCA', blurb: 'Classifies pipeline failures and proposes a fix PR.', icon: Wrench, category: 'Remediation', kind: 'system', live: true, href: '/remediation' },
+  { key: 'peer_review', label: 'PR Traces', blurb: 'Reviews PRs for removed gates, secrets, broad permissions.', icon: GitPullRequest, category: 'Review', kind: 'system', live: true, href: '/pr-reviews' },
+  { key: 'compliance', label: 'Compliance', blurb: 'Audits workflows against HIPAA / PCI / SOC2 controls.', icon: ShieldCheck, category: 'Quality', kind: 'system', live: true, href: '/governance' },
+  { key: 'governance', label: 'Governance', blurb: 'Compares pipelines to your uploaded policy documents.', icon: FileText, category: 'Quality', kind: 'system', live: true, href: '/governance' },
+  { key: 'performance_optimization', label: 'Performance Tuner', blurb: 'Finds parallelization and bottleneck fixes, drafts YAML.', icon: Gauge, category: 'Optimization', kind: 'system', live: true, href: '/optimization' },
+  { key: 'vulnerability_remediation', label: 'Vulnerability RCA', blurb: 'Turns Trivy / Sonar / CodeQL / Dependabot alerts into tracked, root-caused issues.', icon: Bug, category: 'Security', kind: 'system', live: true, href: '/vulnerabilities' },
+
+  { key: 'drift_detector', label: 'Drift Detector', blurb: 'Flags live pipelines drifting from approved templates.', icon: GitCompare, category: 'Governance', kind: 'custom', live: true },
+  { key: 'standardization', label: 'Reuse Detector', blurb: 'Flags job logic that repeats across workflows instead of a shared action/job/workflow.', icon: Layers, category: 'Standardization', kind: 'custom', live: true, href: '/standardization' },
+  { key: 'compliance_watchdog', label: 'Compliance Watchdog', blurb: 'Continuous control checks; opens PRs for missing stages.', icon: ShieldAlert, category: 'Governance', kind: 'custom', live: false },
+  { key: 'audit_evidence', label: 'Audit Evidence', blurb: 'Traverses the graph to build signed compliance reports.', icon: ClipboardCheck, category: 'Compliance', kind: 'custom', live: false },
+  { key: 'vulnerability_remediation_publish', label: 'Vulnerability Remediation', blurb: 'Publishable agent that opens dependency-ordered fix PRs directly in a repo.', icon: ShieldX, category: 'Security', kind: 'custom', live: false },
 ]
 
 @Component({
@@ -41,12 +48,12 @@ const ROSTER: AgentMeta[] = [
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ liveCount() }}</div>
-          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Live agents</div>
+          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ systemAgents.length }}</div>
+          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">System agents</div>
         </div>
         <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ plannedCount() }}</div>
-          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Planned</div>
+          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ customAgents.length }}</div>
+          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Custom agents</div>
         </div>
         <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
           <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ totalRuns() }}</div>
@@ -63,8 +70,34 @@ const ROSTER: AgentMeta[] = [
         <p class="text-sm">Failed to load agent activity. Check your connection.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <div *ngFor="let a of roster" class="bg-white border border-zinc-200 rounded-lg p-5 flex flex-col dark:bg-zinc-900 dark:border-zinc-800">
+      <section class="mb-10">
+        <div class="flex items-center gap-2 mb-1">
+          <lucide-angular [img]="icons.Bot" [size]="16" class="text-amber-600"></lucide-angular>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200">System Agents</h2>
+        </div>
+        <p class="text-xs text-zinc-400 mb-4">Run inside StageCraft across your whole estate.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <ng-container *ngFor="let a of systemAgents">
+            <ng-container *ngTemplateOutlet="card; context: { a: a }"></ng-container>
+          </ng-container>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-center gap-2 mb-1">
+          <lucide-angular [img]="icons.ArrowUpRight" [size]="16" class="text-sky-600"></lucide-angular>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200">Custom Agents</h2>
+        </div>
+        <p class="text-xs text-zinc-400 mb-4">Publishable into your repositories as GitHub-native agents.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <ng-container *ngFor="let a of customAgents">
+            <ng-container *ngTemplateOutlet="card; context: { a: a }"></ng-container>
+          </ng-container>
+        </div>
+      </section>
+
+      <ng-template #card let-a="a">
+        <div class="bg-white border border-zinc-200 rounded-lg p-5 flex flex-col dark:bg-zinc-900 dark:border-zinc-800">
           <div class="flex items-start gap-3 mb-3">
             <div class="w-9 h-9 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 dark:bg-amber-500/10">
               <lucide-angular [img]="a.icon" [size]="18"></lucide-angular>
@@ -105,20 +138,19 @@ const ROSTER: AgentMeta[] = [
             </a>
           </div>
         </div>
-      </div>
+      </ng-template>
     </div>
   `,
 })
 export class AiCrewComponent implements OnInit {
   icons = { AlertCircle, Bot, ArrowUpRight }
-  roster = ROSTER
+  systemAgents = ROSTER.filter((a) => a.kind === 'system')
+  customAgents = ROSTER.filter((a) => a.kind === 'custom')
   formatRelativeTime = formatRelativeTime
 
   summaries = signal<Record<string, AgentSummary>>({})
   error = signal(false)
 
-  liveCount = computed(() => ROSTER.filter(a => a.live).length)
-  plannedCount = computed(() => ROSTER.filter(a => !a.live).length)
   totalRuns = computed(() => Object.values(this.summaries()).reduce((s, a) => s + a.total_runs, 0))
   totalGaps = computed(() => Object.values(this.summaries()).reduce((s, a) => s + a.gaps_found, 0))
 

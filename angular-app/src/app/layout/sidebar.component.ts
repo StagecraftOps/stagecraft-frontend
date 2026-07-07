@@ -30,7 +30,7 @@ export class SidebarComponent {
       items: [
         { label: 'Onboarding', href: '/onboarding', icon: Rocket },
         { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { label: 'Analytics', href: '/analytics', icon: BarChart2 },
+        { label: 'Insights', href: '/analytics', icon: BarChart2 },
         { label: 'Performance', href: '/performance', icon: Gauge },
       ],
     },
@@ -47,7 +47,7 @@ export class SidebarComponent {
       items: [
         { label: 'Agent Fleet', href: '/ai-crew', icon: Bot },
         { label: 'Remediation', href: '/remediation', icon: Wrench },
-        { label: 'Peer Review', href: '/pr-reviews', icon: GitPullRequest },
+        { label: 'PR Traces', href: '/pr-reviews', icon: GitPullRequest },
         { label: 'Vulnerabilities', href: '/vulnerabilities', icon: Bug },
         { label: 'Pipeline Chat', href: '/chat', icon: MessageSquare },
       ],

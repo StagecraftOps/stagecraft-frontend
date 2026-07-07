@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { LucideAngularModule, TrendingUp, Bot, CheckCircle2, AlertCircle } from 'lucide-angular'
+import { LucideAngularModule, TrendingUp, Bot, AlertCircle, Timer, Search, Bug, Activity } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { LineChartComponent } from '../shared/line-chart.component'
 import { BarChartComponent, BarDatum } from '../shared/bar-chart.component'
@@ -9,13 +9,18 @@ import type { AnalyticsData } from '../core/types'
 
 function formatDuration(seconds: number | null | undefined): string {
   if (seconds == null) return '—'
-  if (seconds < 60) return `${Math.round(seconds)}s`
-  const m = Math.floor(seconds / 60)
-  const s = Math.round(seconds % 60)
+  const abs = Math.abs(seconds)
+  if (abs < 60) return `${Math.round(seconds)}s`
+  const m = Math.floor(abs / 60)
+  const s = Math.round(abs % 60)
   if (m < 60) return s ? `${m}m ${s}s` : `${m}m`
   const h = Math.floor(m / 60)
-  return `${h}h ${m % 60}m`
+  if (h < 24) return `${h}h ${m % 60}m`
+  const d = Math.floor(h / 24)
+  return `${d}d ${h % 24}h`
 }
+
+const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low', 'unknown']
 
 @Component({
   selector: 'app-analytics',
@@ -24,7 +29,7 @@ function formatDuration(seconds: number | null | undefined): string {
   templateUrl: './analytics.component.html',
 })
 export class AnalyticsComponent implements OnInit {
-  icons = { TrendingUp, Bot, CheckCircle2, AlertCircle }
+  icons = { TrendingUp, Bot, AlertCircle, Timer, Search, Bug, Activity }
   formatDuration = formatDuration
 
   analytics = signal<AnalyticsData | null>(null)
@@ -64,5 +69,26 @@ export class AnalyticsComponent implements OnInit {
 
   topFailingBars(): BarDatum[] {
     return (this.analytics()?.top_failing_repos ?? []).map((r) => ({ label: r.repo, value: r.count }))
+  }
+
+  topFailingWorkflowBars(): BarDatum[] {
+    return (this.analytics()?.top_failing_workflows ?? []).map((w) => ({ label: w.workflow, value: w.count }))
+  }
+
+  severityEntries(): { sev: string; count: number }[] {
+    const map = this.analytics()?.open_vulns_by_severity ?? {}
+    return Object.keys(map)
+      .map((sev) => ({ sev, count: map[sev] }))
+      .sort((a, b) => SEVERITY_ORDER.indexOf(a.sev) - SEVERITY_ORDER.indexOf(b.sev))
+  }
+
+  severityDot(sev: string): string {
+    switch (sev) {
+      case 'critical': return 'bg-rose-600'
+      case 'high': return 'bg-orange-500'
+      case 'medium': return 'bg-amber-500'
+      case 'low': return 'bg-zinc-400'
+      default: return 'bg-zinc-300'
+    }
   }
 }
