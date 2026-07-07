@@ -86,6 +86,17 @@ export interface RunTrendPoint {
   failed: number
 }
 
+export interface Application {
+  id: string
+  org_login: string
+  name: string
+  slug: string
+  description: string | null
+  repo_names: string[]
+  repo_count: number
+  created_at: string | null
+}
+
 export interface TopFailingWorkflow {
   workflow: string
   count: number

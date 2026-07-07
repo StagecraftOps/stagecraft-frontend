@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { RouterLink, RouterLinkActive } from '@angular/router'
 import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug, Building2, Rocket } from 'lucide-angular'
 import { OrgService } from '../core/org.service'
+import { ApplicationService } from '../core/application.service'
 import { ThemeService } from '../core/theme.service'
 import { ApiService } from '../core/api.service'
 import type { User } from '../core/types'
@@ -28,9 +29,8 @@ export class SidebarComponent {
     {
       section: 'Overview',
       items: [
-        { label: 'Onboarding', href: '/onboarding', icon: Rocket },
-        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { label: 'Insights', href: '/analytics', icon: BarChart2 },
+        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { label: 'Performance', href: '/performance', icon: Gauge },
       ],
     },
@@ -55,7 +55,6 @@ export class SidebarComponent {
     {
       section: 'Quality',
       items: [
-        { label: 'Application Context', href: '/application-context', icon: Building2 },
         { label: 'Governance', href: '/governance', icon: ShieldCheck },
         { label: 'Audit', href: '/audit', icon: ShieldAlert },
         { label: 'Standardization', href: '/standardization', icon: Layers },
@@ -67,11 +66,16 @@ export class SidebarComponent {
 
   settingsItem: NavItem = { label: 'Settings', href: '/settings', icon: Settings }
 
-  constructor(public org: OrgService, public themeSvc: ThemeService, private api: ApiService) {}
+  constructor(public org: OrgService, public appSvc: ApplicationService, public themeSvc: ThemeService, private api: ApiService) {}
 
   onOrgChange(event: Event) {
     const value = (event.target as HTMLSelectElement).value
     this.org.setOrg(value)
+  }
+
+  onAppChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value
+    this.appSvc.setApplication(value)
   }
 
   async logout() {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { API_URL } from './config'
+import { ApplicationService } from './application.service'
 import type {
   User,
   Organization,
@@ -37,7 +38,13 @@ import type {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private appScope: ApplicationService) {}
+
+  // Merge the active application_id into params for application-scoped endpoints.
+  private scoped(params: Record<string, string> = {}): Record<string, string> {
+    const appId = this.appScope.currentApplicationId()
+    return appId ? { ...params, application_id: appId } : params
+  }
 
   fetchCurrentUser(): Promise<User> {
     return firstValueFrom(this.http.get<User>(`${API_URL}/api/v1/auth/me`))
@@ -86,7 +93,7 @@ export class ApiService {
     for (const [k, v] of Object.entries(params)) {
       if (v !== undefined) query[k] = String(v)
     }
-    return firstValueFrom(this.http.get<RunsPage>(`${API_URL}/api/v1/runs/`, { params: query }))
+    return firstValueFrom(this.http.get<RunsPage>(`${API_URL}/api/v1/runs/`, { params: this.scoped(query) }))
   }
 
   async fetchRecentRuns(limit = 20): Promise<WorkflowRun[]> {
@@ -105,7 +112,9 @@ export class ApiService {
 
   async fetchRemediations(): Promise<Remediation[]> {
     const data = await firstValueFrom(
-      this.http.get<{ remediations: Remediation[]; total: number }>(`${API_URL}/api/v1/remediations/`),
+      this.http.get<{ remediations: Remediation[]; total: number }>(`${API_URL}/api/v1/remediations/`, {
+        params: this.scoped(),
+      }),
     )
     return data.remediations
   }
@@ -119,7 +128,7 @@ export class ApiService {
   }
 
   fetchAnalytics(): Promise<AnalyticsData> {
-    return firstValueFrom(this.http.get<AnalyticsData>(`${API_URL}/api/v1/analytics/`))
+    return firstValueFrom(this.http.get<AnalyticsData>(`${API_URL}/api/v1/analytics/`, { params: this.scoped() }))
   }
 
   sendChatMessage(message: string): Promise<{ answer: string; sql?: string | null; data?: Record<string, unknown>[] | null; error?: string | null }> {
@@ -155,7 +164,9 @@ export class ApiService {
 
   async fetchPRReviews(): Promise<PRReview[]> {
     const data = await firstValueFrom(
-      this.http.get<{ reviews: PRReview[]; total: number }>(`${API_URL}/api/v1/pr-reviews/`),
+      this.http.get<{ reviews: PRReview[]; total: number }>(`${API_URL}/api/v1/pr-reviews/`, {
+        params: this.scoped(),
+      }),
     )
     return data.reviews
   }
@@ -191,7 +202,7 @@ export class ApiService {
     if (org) params['org_login'] = org
     if (statusFilter) params['status'] = statusFilter
     return firstValueFrom(
-      this.http.get<VulnerabilityFindingList>(`${API_URL}/api/v1/vulnerabilities/`, { params }),
+      this.http.get<VulnerabilityFindingList>(`${API_URL}/api/v1/vulnerabilities/`, { params: this.scoped(params) }),
     )
   }
 
