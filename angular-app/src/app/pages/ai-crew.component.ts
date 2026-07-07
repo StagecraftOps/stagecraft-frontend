@@ -19,6 +19,7 @@ interface AgentMeta {
   kind: AgentKind
   live: boolean
   href?: string
+  fragment?: string
 }
 
 // System agents run inside StageCraft. Custom agents are (or will be) published into
@@ -35,7 +36,7 @@ const ROSTER: AgentMeta[] = [
   { key: 'standardization', label: 'Reuse Detector', blurb: 'Flags job logic that repeats across workflows instead of a shared action/job/workflow.', icon: Layers, category: 'Standardization', kind: 'custom', live: true, href: '/standardization' },
   { key: 'compliance_watchdog', label: 'Compliance Watchdog', blurb: 'Continuous control checks; opens PRs for missing stages.', icon: ShieldAlert, category: 'Governance', kind: 'custom', live: false },
   { key: 'audit_evidence', label: 'Audit Evidence', blurb: 'Traverses the graph to build signed compliance reports.', icon: ClipboardCheck, category: 'Compliance', kind: 'custom', live: false },
-  { key: 'vulnerability_remediation_publish', label: 'Vulnerability Remediation', blurb: 'Publishable agent that opens dependency-ordered fix PRs directly in a repo (checked against real npm/PyPI registries).', icon: ShieldX, category: 'Security', kind: 'custom', live: true, href: '/vulnerabilities#remediation-agent' },
+  { key: 'vulnerability_remediation_publish', label: 'Vulnerability Remediation', blurb: 'Publishable agent that opens dependency-ordered fix PRs directly in a repo (checked against real npm/PyPI registries).', icon: ShieldX, category: 'Security', kind: 'custom', live: true, href: '/vulnerabilities', fragment: 'remediation-agent' },
 ]
 
 @Component({
@@ -141,7 +142,7 @@ const ROSTER: AgentMeta[] = [
             <span class="text-xs text-zinc-400">
               {{ stat(a.key).last_run_at ? ('Last run ' + formatRelativeTime(stat(a.key).last_run_at!)) : (a.live ? 'No runs yet' : 'Not deployed') }}
             </span>
-            <a *ngIf="a.href" [routerLink]="a.href" class="text-xs text-amber-600 hover:text-amber-700 inline-flex items-center gap-1 font-medium">
+            <a *ngIf="a.href" [routerLink]="a.href" [fragment]="a.fragment" class="text-xs text-amber-600 hover:text-amber-700 inline-flex items-center gap-1 font-medium">
               Open <lucide-angular [img]="icons.ArrowUpRight" [size]="12"></lucide-angular>
             </a>
           </div>
