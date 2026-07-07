@@ -46,23 +46,51 @@ const ROSTER: AgentMeta[] = [
     <div class="p-8">
       <app-page-header eyebrow="AI Crew" title="Agent Fleet" description="Every StageCraft agent, what it governs, and what it has done across your organization."></app-page-header>
 
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ systemAgents.length }}</div>
-          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">System agents</div>
-        </div>
-        <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ customAgents.length }}</div>
-          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Custom agents</div>
-        </div>
-        <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-zinc-800 tabular-nums dark:text-zinc-100">{{ totalRuns() }}</div>
-          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Total runs</div>
-        </div>
-        <div class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
-          <div class="text-2xl font-semibold text-amber-600 tabular-nums">{{ totalGaps() }}</div>
-          <div class="text-xs uppercase tracking-wider text-zinc-400 mt-1">Gaps found</div>
-        </div>
+      <!-- Selectable category cards: click one to reveal only that group. -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <button
+          type="button"
+          (click)="activeKind.set('system')"
+          class="text-left rounded-xl border p-5 transition-all"
+          [ngClass]="activeKind() === 'system'
+            ? 'border-amber-300 bg-amber-50 ring-1 ring-amber-300 dark:bg-amber-500/10 dark:border-amber-500/40 dark:ring-amber-500/30'
+            : 'border-zinc-200 bg-white hover:border-zinc-300 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700'"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center dark:bg-amber-500/20 dark:text-amber-400">
+                <lucide-angular [img]="icons.Bot" [size]="18"></lucide-angular>
+              </div>
+              <div>
+                <div class="font-semibold text-zinc-800 dark:text-zinc-100">System Agents</div>
+                <div class="text-xs text-zinc-400">Run inside StageCraft, across your estate</div>
+              </div>
+            </div>
+            <span class="text-2xl font-bold text-zinc-800 tabular-nums dark:text-zinc-100">{{ systemAgents.length }}</span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          (click)="activeKind.set('custom')"
+          class="text-left rounded-xl border p-5 transition-all"
+          [ngClass]="activeKind() === 'custom'
+            ? 'border-sky-300 bg-sky-50 ring-1 ring-sky-300 dark:bg-sky-500/10 dark:border-sky-500/40 dark:ring-sky-500/30'
+            : 'border-zinc-200 bg-white hover:border-zinc-300 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700'"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-md bg-sky-100 text-sky-700 flex items-center justify-center dark:bg-sky-500/20 dark:text-sky-400">
+                <lucide-angular [img]="icons.ArrowUpRight" [size]="18"></lucide-angular>
+              </div>
+              <div>
+                <div class="font-semibold text-zinc-800 dark:text-zinc-100">Custom Agents</div>
+                <div class="text-xs text-zinc-400">Publishable into your repos as GitHub-native agents</div>
+              </div>
+            </div>
+            <span class="text-2xl font-bold text-zinc-800 tabular-nums dark:text-zinc-100">{{ customAgents.length }}</span>
+          </div>
+        </button>
       </div>
 
       <div *ngIf="error()" class="flex items-center gap-3 text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
@@ -70,31 +98,11 @@ const ROSTER: AgentMeta[] = [
         <p class="text-sm">Failed to load agent activity. Check your connection.</p>
       </div>
 
-      <section class="mb-10">
-        <div class="flex items-center gap-2 mb-1">
-          <lucide-angular [img]="icons.Bot" [size]="16" class="text-amber-600"></lucide-angular>
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200">System Agents</h2>
-        </div>
-        <p class="text-xs text-zinc-400 mb-4">Run inside StageCraft across your whole estate.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <ng-container *ngFor="let a of systemAgents">
-            <ng-container *ngTemplateOutlet="card; context: { a: a }"></ng-container>
-          </ng-container>
-        </div>
-      </section>
-
-      <section>
-        <div class="flex items-center gap-2 mb-1">
-          <lucide-angular [img]="icons.ArrowUpRight" [size]="16" class="text-sky-600"></lucide-angular>
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200">Custom Agents</h2>
-        </div>
-        <p class="text-xs text-zinc-400 mb-4">Publishable into your repositories as GitHub-native agents.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <ng-container *ngFor="let a of customAgents">
-            <ng-container *ngTemplateOutlet="card; context: { a: a }"></ng-container>
-          </ng-container>
-        </div>
-      </section>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <ng-container *ngFor="let a of (activeKind() === 'system' ? systemAgents : customAgents)">
+          <ng-container *ngTemplateOutlet="card; context: { a: a }"></ng-container>
+        </ng-container>
+      </div>
 
       <ng-template #card let-a="a">
         <div class="bg-white border border-zinc-200 rounded-lg p-5 flex flex-col dark:bg-zinc-900 dark:border-zinc-800">
@@ -148,6 +156,7 @@ export class AiCrewComponent implements OnInit {
   customAgents = ROSTER.filter((a) => a.kind === 'custom')
   formatRelativeTime = formatRelativeTime
 
+  activeKind = signal<AgentKind>('system')
   summaries = signal<Record<string, AgentSummary>>({})
   error = signal(false)
 
