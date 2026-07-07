@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink, RouterLinkActive } from '@angular/router'
-import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug, Building2 } from 'lucide-angular'
+import { LucideAngularModule, LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug, Building2, Rocket } from 'lucide-angular'
 import { OrgService } from '../core/org.service'
 import { ThemeService } from '../core/theme.service'
 import { ApiService } from '../core/api.service'
@@ -22,12 +22,13 @@ interface NavItem {
 export class SidebarComponent {
   @Input() user: User | null = null
 
-  icons = { LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug, Building2 }
+  icons = { LayoutDashboard, GitBranch, Workflow, ListChecks, Wrench, Gauge, Layers, GitPullRequest, ShieldCheck, Zap, Network, BarChart2, MessageSquare, Settings, LogOut, Sun, Moon, Bot, ShieldAlert, Bug, Building2, Rocket }
 
   navSections: { section: string; items: NavItem[] }[] = [
     {
       section: 'Overview',
       items: [
+        { label: 'Onboarding', href: '/onboarding', icon: Rocket },
         { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { label: 'Analytics', href: '/analytics', icon: BarChart2 },
         { label: 'Performance', href: '/performance', icon: Gauge },

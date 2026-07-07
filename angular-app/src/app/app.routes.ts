@@ -24,6 +24,7 @@ import { AiCrewComponent } from './pages/ai-crew.component'
 import { AuditComponent } from './pages/audit.component'
 import { VulnerabilitiesComponent } from './pages/vulnerabilities.component'
 import { ApplicationContextComponent } from './pages/application-context.component'
+import { OnboardingComponent } from './pages/onboarding.component'
 
 export const routes: Routes = [
   { path: 'api/auth/callback', component: AuthCallbackComponent },
@@ -39,6 +40,7 @@ export const routes: Routes = [
       { path: 'workflows', component: WorkflowsComponent },
       { path: 'workflows/:owner/:repo', component: WorkflowRepoDetailComponent },
       { path: 'settings', component: SettingsComponent },
+      { path: 'onboarding', component: OnboardingComponent },
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'performance', component: PerformanceComponent },
       { path: 'dependency-graph', component: DependencyGraphComponent },

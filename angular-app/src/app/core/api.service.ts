@@ -287,6 +287,40 @@ export class ApiService {
     }
   }
 
+  async fetchOrgRepos(org: string): Promise<{ repos: { name: string; private: boolean; language: string | null; is_active: boolean }[]; total: number }> {
+    return firstValueFrom(
+      this.http.get<{ repos: { name: string; private: boolean; language: string | null; is_active: boolean }[]; total: number }>(
+        `${API_URL}/api/v1/orgs/${org}/repos`,
+      ),
+    )
+  }
+
+  setOrgRepoScope(org: string, activeRepoNames: string[]): Promise<{ status: string; active_count: number }> {
+    return firstValueFrom(
+      this.http.put<{ status: string; active_count: number }>(`${API_URL}/api/v1/orgs/${org}/repos/scope`, {
+        active_repo_names: activeRepoNames,
+      }),
+    )
+  }
+
+  fetchSyncProgress(org: string): Promise<{
+    org_login: string
+    org_sync_status: string
+    repos: { repo_name: string; status: string; runs_synced: number; error: string | null; updated_at: string | null }[]
+    total: number
+    completed: number
+  }> {
+    return firstValueFrom(
+      this.http.get<{
+        org_login: string
+        org_sync_status: string
+        repos: { repo_name: string; status: string; runs_synced: number; error: string | null; updated_at: string | null }[]
+        total: number
+        completed: number
+      }>(`${API_URL}/api/v1/orgs/${org}/sync-progress`),
+    )
+  }
+
   async fetchTemplates(org: string): Promise<WorkflowTemplate[]> {
     const data = await firstValueFrom(this.http.get<{ templates: WorkflowTemplate[] }>(`${API_URL}/api/v1/orgs/${org}/templates`))
     return data.templates
