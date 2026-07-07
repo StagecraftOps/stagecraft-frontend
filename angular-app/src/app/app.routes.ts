@@ -23,6 +23,7 @@ import { KnowledgeGraphComponent } from './pages/knowledge-graph.component'
 import { AiCrewComponent } from './pages/ai-crew.component'
 import { AuditComponent } from './pages/audit.component'
 import { VulnerabilitiesComponent } from './pages/vulnerabilities.component'
+import { VulnerabilityRemediationComponent } from './pages/vulnerability-remediation.component'
 import { ApplicationContextComponent } from './pages/application-context.component'
 import { OnboardingComponent } from './pages/onboarding.component'
 
@@ -47,6 +48,7 @@ export const routes: Routes = [
       { path: 'ai-crew', component: AiCrewComponent },
       { path: 'audit', component: AuditComponent },
       { path: 'vulnerabilities', component: VulnerabilitiesComponent },
+      { path: 'vulnerability-remediation', component: VulnerabilityRemediationComponent },
       { path: 'remediation', component: RemediationListComponent },
       { path: 'remediation/:id', component: RemediationDetailComponent },
       { path: 'pr-reviews', component: PrReviewsComponent },
