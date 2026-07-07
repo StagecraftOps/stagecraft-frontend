@@ -40,6 +40,14 @@
   .dark .app-shell .border-zinc-200 { border-color: rgb(39 39 42); }
   .dark .app-shell .border-zinc-100 { border-color: rgb(39 39 42); }
 
+  /* Light theme only, main content only (never the sidebar, which is fixed-dark) --
+     the default zinc-400/500 text and zinc-100/200 borders read as too faint on white. */
+  html:not(.dark) .app-shell > main .text-zinc-400 { color: rgb(113 113 122); }
+  html:not(.dark) .app-shell > main .text-zinc-500 { color: rgb(82 82 91); }
+  html:not(.dark) .app-shell > main .border-zinc-200 { border-color: rgb(212 212 216); }
+  html:not(.dark) .app-shell > main .border-zinc-100 { border-color: rgb(228 228 231); }
+  html:not(.dark) .app-shell > main .shadow-sm { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08); }
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
