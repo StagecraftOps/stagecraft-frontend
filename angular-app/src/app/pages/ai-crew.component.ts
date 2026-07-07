@@ -35,7 +35,7 @@ const ROSTER: AgentMeta[] = [
   { key: 'standardization', label: 'Reuse Detector', blurb: 'Flags job logic that repeats across workflows instead of a shared action/job/workflow.', icon: Layers, category: 'Standardization', kind: 'custom', live: true, href: '/standardization' },
   { key: 'compliance_watchdog', label: 'Compliance Watchdog', blurb: 'Continuous control checks; opens PRs for missing stages.', icon: ShieldAlert, category: 'Governance', kind: 'custom', live: false },
   { key: 'audit_evidence', label: 'Audit Evidence', blurb: 'Traverses the graph to build signed compliance reports.', icon: ClipboardCheck, category: 'Compliance', kind: 'custom', live: false },
-  { key: 'vulnerability_remediation_publish', label: 'Vulnerability Remediation', blurb: 'Publishable agent that opens dependency-ordered fix PRs directly in a repo (checked against real npm/PyPI registries).', icon: ShieldX, category: 'Security', kind: 'custom', live: true, href: '/vulnerabilities' },
+  { key: 'vulnerability_remediation_publish', label: 'Vulnerability Remediation', blurb: 'Publishable agent that opens dependency-ordered fix PRs directly in a repo (checked against real npm/PyPI registries).', icon: ShieldX, category: 'Security', kind: 'custom', live: true, href: '/vulnerabilities#remediation-agent' },
 ]
 
 @Component({

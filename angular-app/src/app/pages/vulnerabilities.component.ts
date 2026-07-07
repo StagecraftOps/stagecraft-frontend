@@ -85,7 +85,7 @@ function sourceLabel(source: string): string {
       </div>
 
       <!-- Vulnerability Remediation: Custom agent -->
-      <div class="bg-white border border-zinc-200 rounded-lg p-5 mb-6 dark:bg-zinc-900 dark:border-zinc-800">
+      <div id="remediation-agent" class="bg-white border-2 border-sky-200 rounded-lg p-5 mb-6 dark:bg-zinc-900 dark:border-sky-500/30 scroll-mt-6">
         <div class="flex items-center gap-2 mb-1">
           <lucide-angular [img]="icons.Send" [size]="15" class="text-sky-600"></lucide-angular>
           <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Vulnerability Remediation <span class="text-xs font-normal text-zinc-400">· Custom agent</span></h3>
