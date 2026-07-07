@@ -34,6 +34,8 @@ import type {
   VulnerabilityFindingList,
   ApplicationContextList,
   ApplicationContext,
+  CustomAgentConfig,
+  SkillFile,
 } from './types'
 
 @Injectable({ providedIn: 'root' })
@@ -220,6 +222,23 @@ export class ApiService {
       this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/publish`, {
         org_login: org,
         repo_name: repo,
+      }),
+    )
+  }
+
+  fetchCustomAgentConfig(org: string, agentKey: string): Promise<CustomAgentConfig> {
+    return firstValueFrom(
+      this.http.get<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`),
+    )
+  }
+
+  saveCustomAgentConfig(
+    org: string, agentKey: string, systemPrompt: string | null, skillFiles: SkillFile[],
+  ): Promise<CustomAgentConfig> {
+    return firstValueFrom(
+      this.http.put<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`, {
+        system_prompt: systemPrompt,
+        skill_files: skillFiles,
       }),
     )
   }

@@ -86,6 +86,18 @@ export interface RunTrendPoint {
   failed: number
 }
 
+export interface SkillFile {
+  name: string
+  content: string
+}
+
+export interface CustomAgentConfig {
+  agent_key: string
+  system_prompt: string | null
+  skill_files: SkillFile[]
+  updated_at: string | null
+}
+
 export interface Application {
   id: string
   org_login: string

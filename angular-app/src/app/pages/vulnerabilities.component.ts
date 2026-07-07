@@ -1,13 +1,15 @@
 import { Component, OnInit, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { LucideAngularModule, Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes, Rocket, Send } from 'lucide-angular'
+import { LucideAngularModule, Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes, Rocket, Send, Settings, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { ApiService } from '../core/api.service'
 import { OrgService } from '../core/org.service'
 import { ApplicationService } from '../core/application.service'
 import { formatRelativeTime } from '../core/utils'
-import type { VulnerabilityFinding } from '../core/types'
+import type { VulnerabilityFinding, SkillFile } from '../core/types'
+
+const AGENT_KEY = 'vulnerability_remediation'
 
 function severityClasses(sev: string | null): string {
   switch (sev) {
@@ -113,6 +115,57 @@ function sourceLabel(source: string): string {
           </button>
         </div>
         <p *ngIf="remediationMessage()" class="text-xs text-zinc-500 dark:text-zinc-400 mt-3">{{ remediationMessage() }}</p>
+
+        <!-- Agent configuration: system prompt + skill files -->
+        <div class="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <button (click)="toggleConfig()" class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">
+            <lucide-angular [img]="icons.Settings" [size]="13"></lucide-angular>
+            Agent configuration (system prompt &amp; skill files)
+            <lucide-angular [img]="configOpen() ? icons.ChevronUp : icons.ChevronDown" [size]="13"></lucide-angular>
+          </button>
+
+          <div *ngIf="configOpen()" class="mt-3 space-y-4">
+            <div *ngIf="configLoading()" class="h-20 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg animate-pulse"></div>
+
+            <ng-container *ngIf="!configLoading()">
+              <div>
+                <label class="block text-xs font-medium text-zinc-500 mb-1">System prompt</label>
+                <textarea [ngModel]="systemPrompt()" (ngModelChange)="systemPrompt.set($event)" rows="4"
+                  placeholder="e.g. Never auto-fix packages under services/legacy/. Prefer minor version bumps over major."
+                  class="w-full text-sm border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"></textarea>
+                <p class="text-[11px] text-zinc-400 mt-1">Prepended to the agent's own instructions before every fix decision.</p>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-medium text-zinc-500">Skill files</label>
+                  <button (click)="addSkillFile()" class="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline">
+                    <lucide-angular [img]="icons.Plus" [size]="12"></lucide-angular> Add file
+                  </button>
+                </div>
+                <div *ngFor="let f of skillFiles(); let i = index" class="border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 mb-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <input [ngModel]="f.name" (ngModelChange)="updateSkillFileName(i, $event)" placeholder="filename.md"
+                      class="flex-1 text-xs font-mono border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+                    <button (click)="removeSkillFile(i)" class="text-zinc-400 hover:text-rose-500">
+                      <lucide-angular [img]="icons.Trash2" [size]="13"></lucide-angular>
+                    </button>
+                  </div>
+                  <textarea [ngModel]="f.content" (ngModelChange)="updateSkillFileContent(i, $event)" rows="3"
+                    placeholder="Instructions/constraints for this skill…"
+                    class="w-full text-xs border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"></textarea>
+                </div>
+                <p *ngIf="skillFiles().length === 0" class="text-xs text-zinc-400">No skill files yet.</p>
+              </div>
+
+              <button (click)="saveConfig()" [disabled]="savingConfig()"
+                class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-md bg-zinc-800 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white disabled:opacity-50 transition-colors">
+                {{ savingConfig() ? 'Saving…' : 'Save configuration' }}
+              </button>
+              <p *ngIf="configMessage()" class="text-xs text-zinc-500 dark:text-zinc-400">{{ configMessage() }}</p>
+            </ng-container>
+          </div>
+        </div>
       </div>
 
       <div class="flex flex-col gap-2">
@@ -152,7 +205,7 @@ function sourceLabel(source: string): string {
   `,
 })
 export class VulnerabilitiesComponent implements OnInit {
-  icons = { Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes, Rocket, Send }
+  icons = { Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes, Rocket, Send, Settings, Plus, Trash2, ChevronDown, ChevronUp }
   formatRelativeTime = formatRelativeTime
   severityClasses = severityClasses
   sourceLabel = sourceLabel
@@ -166,6 +219,14 @@ export class VulnerabilitiesComponent implements OnInit {
   publishing = signal(false)
   running = signal(false)
   remediationMessage = signal<string | null>(null)
+
+  configOpen = signal(false)
+  configLoading = signal(false)
+  savingConfig = signal(false)
+  configMessage = signal<string | null>(null)
+  systemPrompt = signal<string>('')
+  skillFiles = signal<SkillFile[]>([])
+  private configLoaded = false
 
   distinctRepos = computed(() =>
     Array.from(new Set(this.findings().map((f) => f.repo_name))).sort(),
@@ -223,6 +284,52 @@ export class VulnerabilitiesComponent implements OnInit {
       this.remediationMessage.set('Failed to enqueue dependency fix. Try again.')
     } finally {
       this.running.set(false)
+    }
+  }
+
+  async toggleConfig() {
+    this.configOpen.set(!this.configOpen())
+    if (this.configOpen() && !this.configLoaded) {
+      this.configLoading.set(true)
+      try {
+        const config = await this.api.fetchCustomAgentConfig(this.org.currentOrg(), AGENT_KEY)
+        this.systemPrompt.set(config.system_prompt || '')
+        this.skillFiles.set(config.skill_files || [])
+        this.configLoaded = true
+      } catch {
+        this.configMessage.set('Failed to load agent configuration.')
+      } finally {
+        this.configLoading.set(false)
+      }
+    }
+  }
+
+  addSkillFile() {
+    this.skillFiles.set([...this.skillFiles(), { name: '', content: '' }])
+  }
+
+  removeSkillFile(index: number) {
+    this.skillFiles.set(this.skillFiles().filter((_, i) => i !== index))
+  }
+
+  updateSkillFileName(index: number, name: string) {
+    this.skillFiles.set(this.skillFiles().map((f, i) => (i === index ? { ...f, name } : f)))
+  }
+
+  updateSkillFileContent(index: number, content: string) {
+    this.skillFiles.set(this.skillFiles().map((f, i) => (i === index ? { ...f, content } : f)))
+  }
+
+  async saveConfig() {
+    this.savingConfig.set(true)
+    this.configMessage.set(null)
+    try {
+      await this.api.saveCustomAgentConfig(this.org.currentOrg(), AGENT_KEY, this.systemPrompt() || null, this.skillFiles())
+      this.configMessage.set('Saved. Applies to the next fix/publish run.')
+    } catch {
+      this.configMessage.set('Failed to save. Try again.')
+    } finally {
+      this.savingConfig.set(false)
     }
   }
 }
