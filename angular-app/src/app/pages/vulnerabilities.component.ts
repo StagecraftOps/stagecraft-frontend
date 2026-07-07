@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { LucideAngularModule, Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes } from 'lucide-angular'
+import { LucideAngularModule, Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes, Rocket, Send } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { ApiService } from '../core/api.service'
 import { OrgService } from '../core/org.service'
@@ -82,6 +82,39 @@ function sourceLabel(source: string): string {
         <p class="text-sm text-zinc-400">No vulnerability findings in this scope yet. They appear here when Trivy, Sonar, CodeQL, or Dependabot raises an alert.</p>
       </div>
 
+      <!-- Vulnerability Remediation: Custom agent -->
+      <div class="bg-white border border-zinc-200 rounded-lg p-5 mb-6 dark:bg-zinc-900 dark:border-zinc-800">
+        <div class="flex items-center gap-2 mb-1">
+          <lucide-angular [img]="icons.Send" [size]="15" class="text-sky-600"></lucide-angular>
+          <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Vulnerability Remediation <span class="text-xs font-normal text-zinc-400">· Custom agent</span></h3>
+        </div>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+          Publishes scanning into a repo, or raises a fix PR for the most foundational vulnerable dependency first
+          when several open findings depend on each other (checked against the real npm/PyPI registries).
+        </p>
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <label class="block text-xs text-zinc-500 mb-1">Repository</label>
+            <select [ngModel]="remediationRepo()" (ngModelChange)="remediationRepo.set($event)"
+              class="text-sm border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500 min-w-[220px]">
+              <option value="">Select a repo…</option>
+              <option *ngFor="let r of remediationRepoOptions()" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+          <button (click)="publishAgent()" [disabled]="!remediationRepo() || publishing()"
+            class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors">
+            <lucide-angular [img]="icons.Rocket" [size]="14"></lucide-angular>
+            {{ publishing() ? 'Publishing…' : 'Publish to repo' }}
+          </button>
+          <button (click)="runDependencyFix()" [disabled]="!remediationRepo() || running()"
+            class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors">
+            <lucide-angular [img]="icons.Send" [size]="14"></lucide-angular>
+            {{ running() ? 'Running…' : 'Run dependency-ordered fix' }}
+          </button>
+        </div>
+        <p *ngIf="remediationMessage()" class="text-xs text-zinc-500 dark:text-zinc-400 mt-3">{{ remediationMessage() }}</p>
+      </div>
+
       <div class="flex flex-col gap-2">
         <div *ngFor="let f of visibleFindings()" class="bg-white border border-zinc-200 rounded-lg p-4 dark:bg-zinc-900 dark:border-zinc-800">
           <div class="flex items-start gap-3">
@@ -119,7 +152,7 @@ function sourceLabel(source: string): string {
   `,
 })
 export class VulnerabilitiesComponent implements OnInit {
-  icons = { Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes }
+  icons = { Bug, ExternalLink, AlertCircle, GitPullRequest, CircleAlert, Network, Boxes, Rocket, Send }
   formatRelativeTime = formatRelativeTime
   severityClasses = severityClasses
   sourceLabel = sourceLabel
@@ -129,12 +162,21 @@ export class VulnerabilitiesComponent implements OnInit {
   error = signal(false)
   repoFilter = signal<string>('')
 
+  remediationRepo = signal<string>('')
+  publishing = signal(false)
+  running = signal(false)
+  remediationMessage = signal<string | null>(null)
+
   distinctRepos = computed(() =>
     Array.from(new Set(this.findings().map((f) => f.repo_name))).sort(),
   )
   visibleFindings = computed(() => {
     const repo = this.repoFilter()
     return repo ? this.findings().filter((f) => f.repo_name === repo) : this.findings()
+  })
+  remediationRepoOptions = computed(() => {
+    const appRepos = this.appSvc.currentApplication()?.repo_names
+    return appRepos && appRepos.length ? appRepos : this.distinctRepos()
   })
 
   criticalCount = computed(() => this.visibleFindings().filter(f => f.severity_in_context === 'critical').length)
@@ -151,6 +193,36 @@ export class VulnerabilitiesComponent implements OnInit {
       this.error.set(true)
     } finally {
       this.isLoading.set(false)
+    }
+  }
+
+  async publishAgent() {
+    const repo = this.remediationRepo()
+    if (!repo) return
+    this.publishing.set(true)
+    this.remediationMessage.set(null)
+    try {
+      await this.api.publishVulnerabilityAgent(this.org.currentOrg(), repo)
+      this.remediationMessage.set(`Publish requested for ${repo} — check GitHub for the PR shortly.`)
+    } catch {
+      this.remediationMessage.set('Failed to enqueue publish. Try again.')
+    } finally {
+      this.publishing.set(false)
+    }
+  }
+
+  async runDependencyFix() {
+    const repo = this.remediationRepo()
+    if (!repo) return
+    this.running.set(true)
+    this.remediationMessage.set(null)
+    try {
+      await this.api.runVulnerabilityDependencyFix(this.org.currentOrg(), repo)
+      this.remediationMessage.set(`Dependency-ordered fix requested for ${repo} — check back here or on GitHub shortly.`)
+    } catch {
+      this.remediationMessage.set('Failed to enqueue dependency fix. Try again.')
+    } finally {
+      this.running.set(false)
     }
   }
 }

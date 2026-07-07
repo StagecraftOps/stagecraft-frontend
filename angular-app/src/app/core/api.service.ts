@@ -206,6 +206,24 @@ export class ApiService {
     )
   }
 
+  runVulnerabilityDependencyFix(org: string, repo: string): Promise<{ status: string }> {
+    return firstValueFrom(
+      this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/run`, {
+        org_login: org,
+        repo_name: repo,
+      }),
+    )
+  }
+
+  publishVulnerabilityAgent(org: string, repo: string): Promise<{ status: string }> {
+    return firstValueFrom(
+      this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/publish`, {
+        org_login: org,
+        repo_name: repo,
+      }),
+    )
+  }
+
   async fetchApplicationContexts(org: string): Promise<ApplicationContextList> {
     const params: Record<string, string> = org ? { org_login: org } : {}
     return firstValueFrom(
