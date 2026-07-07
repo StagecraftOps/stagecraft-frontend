@@ -1,38 +1,47 @@
 <div class="p-8 max-w-2xl mx-auto">
-  <app-page-header title="Onboarding" description="Connect your GitHub organization and set up StageCraft governance."></app-page-header>
+  <div class="bg-white border border-zinc-200 rounded-xl shadow-sm dark:bg-zinc-900 dark:border-zinc-800 overflow-hidden">
+    <div class="p-6 pb-0">
+      <app-page-header title="Onboarding" description="Connect your GitHub organization and set up StageCraft governance."></app-page-header>
 
-  <!-- Step indicator -->
-  <div class="flex items-center mb-8">
-    <ng-container *ngFor="let step of steps; let i = index; let last = last">
-      <button
-        type="button"
-        (click)="goToStep(i)"
-        class="flex flex-col items-center gap-2 flex-shrink-0"
-        [disabled]="i > currentStep()"
-      >
-        <div
-          class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold border transition-colors"
-          [ngClass]="i === currentStep()
-            ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30'
-            : i < currentStep()
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-              : 'bg-zinc-100 text-zinc-400 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-500 dark:border-zinc-700'"
-        >
-          <lucide-angular *ngIf="i < currentStep()" [img]="icons.CheckCircle2" [size]="15"></lucide-angular>
-          <span *ngIf="i >= currentStep()">{{ i + 1 }}</span>
-        </div>
-        <span
-          class="text-xs font-medium whitespace-nowrap"
-          [ngClass]="i === currentStep() ? 'text-amber-700 dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'"
-        >{{ step.label }}</span>
-      </button>
-      <div *ngIf="!last" class="flex-1 h-px mx-2 bg-zinc-200 dark:bg-zinc-800"></div>
-    </ng-container>
-  </div>
+      <!-- Step indicator -->
+      <div class="flex items-center mb-6">
+        <ng-container *ngFor="let step of steps; let i = index; let last = last">
+          <button
+            type="button"
+            (click)="goToStep(i)"
+            class="flex flex-col items-center gap-2 flex-shrink-0"
+            [disabled]="i > currentStep()"
+          >
+            <div
+              class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold border transition-colors"
+              [ngClass]="i === currentStep()
+                ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30'
+                : i < currentStep()
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                  : 'bg-zinc-100 text-zinc-400 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-500 dark:border-zinc-700'"
+            >
+              <lucide-angular *ngIf="i < currentStep()" [img]="icons.CheckCircle2" [size]="15"></lucide-angular>
+              <span *ngIf="i >= currentStep()">{{ i + 1 }}</span>
+            </div>
+            <span
+              class="text-xs font-medium whitespace-nowrap"
+              [ngClass]="i === currentStep() ? 'text-amber-700 dark:text-amber-400' : 'text-zinc-500 dark:text-zinc-400'"
+            >{{ step.label }}</span>
+          </button>
+          <div *ngIf="!last" class="flex-1 h-px mx-2 bg-zinc-200 dark:bg-zinc-800"></div>
+        </ng-container>
+      </div>
 
-  <!-- Content panel -->
-  <div class="bg-white border border-zinc-200 rounded-lg shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
-    <div class="p-6 min-h-[120px] flex flex-col justify-center">
+      <!-- Guide line for the active step -->
+      <div class="flex items-start gap-2 mb-6 px-3 py-2.5 bg-amber-50 border border-amber-100 rounded-lg dark:bg-amber-500/5 dark:border-amber-500/10">
+        <lucide-angular [img]="icons.Info" [size]="14" class="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"></lucide-angular>
+        <p class="text-xs text-amber-800 dark:text-amber-300">{{ steps[currentStep()].guide }}</p>
+      </div>
+    </div>
+
+    <!-- Content panel -->
+    <div class="border-t border-zinc-100 dark:border-zinc-800">
+      <div class="p-6 min-h-[120px] flex flex-col justify-center">
       <!-- Step 1: Connect -->
       <ng-container *ngIf="currentStep() === 0">
         <div *ngIf="isLoadingOrgs()" class="h-24 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg animate-pulse"></div>
@@ -210,34 +219,35 @@
           </div>
         </div>
       </ng-container>
-    </div>
+      </div>
 
-    <!-- Footer nav -->
-    <div class="flex items-center justify-between px-6 py-4 border-t border-zinc-100 dark:border-zinc-800">
-      <button
-        (click)="back()"
-        [disabled]="currentStep() === 0"
-        class="px-4 py-2 text-sm font-medium rounded-md text-zinc-600 hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
-      >
-        Back
-      </button>
+      <!-- Footer nav -->
+      <div class="flex items-center justify-between px-6 py-4 border-t border-zinc-100 dark:border-zinc-800">
+        <button
+          (click)="back()"
+          [disabled]="currentStep() === 0"
+          class="px-4 py-2 text-sm font-medium rounded-md text-zinc-600 hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
+        >
+          Back
+        </button>
 
-      <button
-        *ngIf="currentStep() < steps.length - 1"
-        (click)="next()"
-        [disabled]="currentStep() === 0 && !hasOrg()"
-        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
-        {{ currentStep() === 1 && savingScope() ? 'Saving...' : 'Next' }}
-      </button>
+        <button
+          *ngIf="currentStep() < steps.length - 1"
+          (click)="next()"
+          [disabled]="currentStep() === 0 && !hasOrg()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          {{ currentStep() === 1 && savingScope() ? 'Saving...' : 'Next' }}
+        </button>
 
-      <a
-        *ngIf="currentStep() === steps.length - 1"
-        routerLink="/dashboard"
-        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 transition-colors"
-      >
-        Finish
-      </a>
+        <a
+          *ngIf="currentStep() === steps.length - 1"
+          routerLink="/dashboard"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+        >
+          Finish
+        </a>
+      </div>
     </div>
   </div>
 </div>

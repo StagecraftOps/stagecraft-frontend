@@ -12,6 +12,7 @@ import {
   Layers,
   ShieldCheck,
   Building2,
+  Info,
 } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { ApiService } from '../core/api.service'
@@ -27,6 +28,7 @@ interface RepoRow {
 
 interface StepDef {
   label: string
+  guide: string
 }
 
 @Component({
@@ -36,14 +38,14 @@ interface StepDef {
   templateUrl: './onboarding.component.html',
 })
 export class OnboardingComponent implements OnInit, OnDestroy {
-  icons = { Github, CheckCircle2, Circle, Loader2, XCircle, ExternalLink, Layers, ShieldCheck, Building2 }
+  icons = { Github, CheckCircle2, Circle, Loader2, XCircle, ExternalLink, Layers, ShieldCheck, Building2, Info }
 
   steps: StepDef[] = [
-    { label: 'Connect' },
-    { label: 'Select Scope' },
-    { label: 'Templates' },
-    { label: 'Standards' },
-    { label: 'Analysis' },
+    { label: 'Connect', guide: 'Install the StageCraft GitHub App on the organization you want to govern.' },
+    { label: 'Select Scope', guide: 'Choose which repositories StageCraft should monitor. You can widen this later.' },
+    { label: 'Templates', guide: 'Review the workflow templates already registered for this organization.' },
+    { label: 'Standards', guide: 'Check how much of your active scope has governance context configured.' },
+    { label: 'Analysis', guide: 'StageCraft is discovering your estate and syncing pipeline history in the background.' },
   ]
 
   currentStep = signal(0)
