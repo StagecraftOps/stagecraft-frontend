@@ -235,6 +235,15 @@ export class ApiService {
     )
   }
 
+  runCopilotRemediation(org: string, repo: string): Promise<{ status: string }> {
+    return firstValueFrom(
+      this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/run-copilot`, {
+        org_login: org,
+        repo_name: repo,
+      }),
+    )
+  }
+
   fetchCustomAgentConfig(org: string, agentKey: string, repoName: string = ''): Promise<CustomAgentConfig> {
     return firstValueFrom(
       this.http.get<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`, {
