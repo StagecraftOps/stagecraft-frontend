@@ -181,10 +181,11 @@ export class ApiService {
     )
   }
 
-  async fetchAgentRuns(org: string, agentName?: string): Promise<AgentRun[]> {
+  async fetchAgentRuns(org: string, agentName?: string, repoName?: string): Promise<AgentRun[]> {
     const params: Record<string, string> = {}
     if (org) params['org_login'] = org
     if (agentName) params['agent_name'] = agentName
+    if (repoName) params['repo_name'] = repoName
     const data = await firstValueFrom(
       this.http.get<{ runs: AgentRun[]; total: number }>(`${API_URL}/api/v1/agent-runs/`, { params }),
     )
