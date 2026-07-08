@@ -11,7 +11,7 @@
     <div class="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
       <div class="flex items-start justify-between">
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Change Failure Rate</p>
+          <p class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Failure Rate</p>
           <p class="mt-2 text-2xl font-bold text-zinc-800 tabular-nums">{{ completed() ? (failurePct() | number: '1.1-1') + '%' : '—' }}</p>
           <p class="text-[11px] text-zinc-400 mt-1">of {{ completed().toLocaleString() }} completed runs</p>
         </div>
@@ -47,7 +47,7 @@
     <div class="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
       <div class="flex items-start justify-between">
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-medium text-zinc-500 uppercase tracking-wider">AI PRs Raised</p>
+          <p class="text-xs font-medium text-zinc-500 uppercase tracking-wider">PRs Raised</p>
           <p class="mt-2 text-2xl font-bold text-zinc-800 tabular-nums">{{ analytics()?.remediations_raised ?? 0 }}</p>
           <p class="text-[11px] text-zinc-400 mt-1">auto-remediation fixes</p>
         </div>
