@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { LucideAngularModule, TrendingUp, Bot, AlertCircle, Timer, Search, Bug, Activity } from 'lucide-angular'
+import { LucideAngularModule, TrendingUp, Bot, AlertCircle, Timer, Search, Bug, Activity, AlertTriangle } from 'lucide-angular'
 import { PageHeaderComponent } from '../shared/page-header.component'
 import { LineChartComponent } from '../shared/line-chart.component'
 import { BarChartComponent, BarDatum } from '../shared/bar-chart.component'
@@ -29,7 +29,7 @@ const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low', 'unknown']
   templateUrl: './analytics.component.html',
 })
 export class AnalyticsComponent implements OnInit {
-  icons = { TrendingUp, Bot, AlertCircle, Timer, Search, Bug, Activity }
+  icons = { TrendingUp, Bot, AlertCircle, Timer, Search, Bug, Activity, AlertTriangle }
   formatDuration = formatDuration
 
   analytics = signal<AnalyticsData | null>(null)
@@ -37,6 +37,7 @@ export class AnalyticsComponent implements OnInit {
   error = signal(false)
 
   suggestion = signal<string | null>(null)
+  suggestionSeverity = signal<string>('ok')
   suggestionLoading = signal(false)
 
   constructor(private api: ApiService) {}
@@ -56,7 +57,7 @@ export class AnalyticsComponent implements OnInit {
   private async loadSuggestion(data: AnalyticsData) {
     this.suggestionLoading.set(true)
     try {
-      const { suggestion } = await this.api.fetchInsightSuggestion('insights', {
+      const { suggestion, severity } = await this.api.fetchInsightSuggestion('insights', {
         failure_rate: data.failure_rate,
         completed_runs: data.completed_runs,
         mttr_seconds: data.mttr_seconds,
@@ -68,6 +69,7 @@ export class AnalyticsComponent implements OnInit {
         top_failing_workflows: data.top_failing_workflows,
       })
       this.suggestion.set(suggestion)
+      this.suggestionSeverity.set(severity)
     } catch {
       this.suggestion.set(null)
     } finally {

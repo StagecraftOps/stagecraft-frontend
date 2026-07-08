@@ -31,6 +31,7 @@ export class PerformanceComponent {
   isLoading = signal(true)
 
   suggestion = signal<string | null>(null)
+  suggestionSeverity = signal<string>('ok')
   suggestionLoading = signal(false)
 
   constructor(public org: OrgService, private api: ApiService) {
@@ -61,7 +62,7 @@ export class PerformanceComponent {
   ) {
     this.suggestionLoading.set(true)
     try {
-      const { suggestion } = await this.api.fetchInsightSuggestion('performance', {
+      const { suggestion, severity } = await this.api.fetchInsightSuggestion('performance', {
         longest_jobs: jobs.slice(0, 5).map((j) => ({ job: j.job_name, repo: j.repo_name, seconds: j.duration_seconds })),
         longest_workflows: workflows.slice(0, 5).map((w) => ({ workflow: w.workflow_name, repo: w.repo_name, seconds: w.duration_seconds })),
         runner_breakdown: runners.map((r) => ({
@@ -71,6 +72,7 @@ export class PerformanceComponent {
         })),
       })
       this.suggestion.set(suggestion)
+      this.suggestionSeverity.set(severity)
     } catch {
       this.suggestion.set(null)
     } finally {

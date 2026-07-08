@@ -1,10 +1,18 @@
 <div class="p-8">
   <app-page-header eyebrow="Overview" title="Runtime Performance" description="Longest-running jobs and workflows — pure duration ranking, no AI involved.">
     <!-- Suggested focus: one short AI-generated recommendation from the metrics below. -->
-    <div actions *ngIf="suggestionLoading() || suggestion()" class="border border-zinc-200 dark:border-zinc-800 rounded-lg px-3.5 py-2.5 bg-white dark:bg-zinc-900 max-w-xs">
-      <p class="text-[10px] font-medium text-zinc-400 uppercase tracking-wider mb-1">Suggested focus</p>
+    <div actions *ngIf="suggestionLoading() || suggestion()" class="border rounded-lg px-3.5 py-2.5 max-w-xs"
+      [ngClass]="{
+        'border-rose-200 bg-rose-50 dark:bg-rose-500/10 dark:border-rose-500/30': suggestionSeverity() === 'critical',
+        'border-amber-200 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-500/30': suggestionSeverity() === 'warning',
+        'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900': suggestionSeverity() === 'ok'
+      }">
+      <div class="flex items-center gap-1.5 mb-1">
+        <lucide-angular *ngIf="suggestionSeverity() !== 'ok'" [img]="icons.AlertTriangle" [size]="11" [ngClass]="suggestionSeverity() === 'critical' ? 'text-rose-600' : 'text-amber-600'"></lucide-angular>
+        <p class="text-[10px] font-medium uppercase tracking-wider" [ngClass]="suggestionSeverity() === 'critical' ? 'text-rose-600' : suggestionSeverity() === 'warning' ? 'text-amber-600' : 'text-zinc-400'">Suggested focus</p>
+      </div>
       <div *ngIf="suggestionLoading()" class="h-3.5 w-32 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
-      <p *ngIf="!suggestionLoading() && suggestion()" class="text-xs text-zinc-700 dark:text-zinc-300 leading-snug">{{ suggestion() }}</p>
+      <p *ngIf="!suggestionLoading() && suggestion()" class="text-xs leading-snug" [ngClass]="suggestionSeverity() === 'critical' ? 'text-rose-800 dark:text-rose-300 font-medium' : suggestionSeverity() === 'warning' ? 'text-amber-800 dark:text-amber-300' : 'text-zinc-700 dark:text-zinc-300'">{{ suggestion() }}</p>
     </div>
   </app-page-header>
 
