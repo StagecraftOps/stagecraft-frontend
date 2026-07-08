@@ -1,4 +1,4 @@
-import { Component, computed, effect, signal } from '@angular/core'
+import { Component, OnDestroy, computed, effect, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule, RefreshCw, Clock, CheckCircle2, XCircle, ExternalLink, ChevronDown, ChevronUp } from 'lucide-angular'
@@ -23,7 +23,7 @@ function formatDuration(seconds: number): string {
   imports: [CommonModule, FormsModule, LucideAngularModule, PageHeaderComponent, BadgeComponent],
   templateUrl: './optimization.component.html',
 })
-export class OptimizationComponent {
+export class OptimizationComponent implements OnDestroy {
   icons = { RefreshCw, Clock, CheckCircle2, XCircle, ExternalLink, ChevronDown, ChevronUp }
   formatDuration = formatDuration
 
@@ -34,11 +34,15 @@ export class OptimizationComponent {
   analyzing = signal(false)
   accepting = signal<string | null>(null)
   openDiffIds = signal<Set<string>>(new Set())
+  batchAnalyzing = signal(false)
+  batchProgress = signal<{ done: number; total: number } | null>(null)
 
   private autoAnalyzeTriedFor = new Set<string>()
+  private batchPollTimer: ReturnType<typeof setInterval> | null = null
 
   repos = computed(() => Array.from(new Set(this.workflows().map((w) => w.repo_name))).sort())
   repoWorkflows = computed(() => this.workflows().filter((w) => w.repo_name === this.selectedRepo()))
+  analyzedWorkflowFiles = computed(() => new Set(this.recommendations().map((r) => r.workflow_file)))
 
   constructor(public org: OrgService, private api: ApiService) {
     effect(() => {
@@ -54,7 +58,7 @@ export class OptimizationComponent {
     const repoWfs = workflows.filter((w) => w.repo_name === this.selectedRepo())
     if (repoWfs.length > 0 && !this.selectedWorkflow()) this.selectedWorkflow.set(repoWfs[0].path)
     await this.loadRecommendations()
-    this.maybeAutoAnalyze()
+    this.autoAnalyzeAllUnanalyzed()
   }
 
   onRepoChange(repo: string) {
@@ -62,7 +66,7 @@ export class OptimizationComponent {
     this.selectedWorkflow.set('')
     const repoWfs = this.workflows().filter((w) => w.repo_name === repo)
     if (repoWfs.length > 0) this.selectedWorkflow.set(repoWfs[0].path)
-    this.loadRecommendations().then(() => this.maybeAutoAnalyze())
+    this.loadRecommendations().then(() => this.autoAnalyzeAllUnanalyzed())
   }
 
   async loadRecommendations() {
@@ -70,11 +74,42 @@ export class OptimizationComponent {
     this.recommendations.set(await this.api.fetchOptimizationRecommendations(this.org.currentOrg(), this.selectedRepo()))
   }
 
-  private maybeAutoAnalyze() {
-    const key = `${this.selectedRepo()}::${this.selectedWorkflow()}`
-    if (!this.selectedWorkflow() || this.recommendations().length > 0 || this.autoAnalyzeTriedFor.has(key)) return
-    this.autoAnalyzeTriedFor.add(key)
-    this.analyze()
+  private async autoAnalyzeAllUnanalyzed() {
+    const repo = this.selectedRepo()
+    const pending = this.repoWorkflows().filter((w) => {
+      const key = `${repo}::${w.path}`
+      return !this.analyzedWorkflowFiles().has(w.path) && !this.autoAnalyzeTriedFor.has(key)
+    })
+    if (pending.length === 0) return
+
+    this.batchAnalyzing.set(true)
+    this.batchProgress.set({ done: 0, total: pending.length })
+    for (const [i, wf] of pending.entries()) {
+      this.autoAnalyzeTriedFor.add(`${repo}::${wf.path}`)
+      try {
+        await this.api.analyzeOptimization(this.org.currentOrg(), repo, wf.path)
+      } catch {
+        // best-effort -- one workflow failing to enqueue shouldn't stop the rest
+      }
+      this.batchProgress.set({ done: i + 1, total: pending.length })
+      await new Promise((r) => setTimeout(r, 400))
+    }
+    this.batchAnalyzing.set(false)
+    this.startBatchPoll()
+  }
+
+  private startBatchPoll() {
+    if (this.batchPollTimer) return
+    let ticks = 0
+    this.batchPollTimer = setInterval(async () => {
+      ticks++
+      await this.loadRecommendations()
+      if (ticks >= 15 || this.analyzedWorkflowFiles().size >= this.repoWorkflows().length) {
+        clearInterval(this.batchPollTimer!)
+        this.batchPollTimer = null
+        this.batchProgress.set(null)
+      }
+    }, 4000)
   }
 
   async analyze() {
@@ -120,5 +155,9 @@ export class OptimizationComponent {
 
   addedLineCount(rec: OptimizationRecommendation): number {
     return this.diffFor(rec).filter((l) => l.kind === 'added').length
+  }
+
+  ngOnDestroy() {
+    if (this.batchPollTimer) clearInterval(this.batchPollTimer)
   }
 }

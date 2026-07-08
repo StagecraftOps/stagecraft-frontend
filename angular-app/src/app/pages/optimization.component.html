@@ -14,7 +14,13 @@
     </ng-container>
   </app-page-header>
 
-  <div *ngIf="recommendations().length === 0" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
+  <div *ngIf="batchAnalyzing() || batchProgress()" class="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+    <lucide-angular [img]="icons.RefreshCw" [size]="12" class="animate-spin"></lucide-angular>
+    <span *ngIf="batchAnalyzing()">Analyzing workflows in {{ selectedRepo() }} — {{ batchProgress()?.done }}/{{ batchProgress()?.total }} dispatched…</span>
+    <span *ngIf="!batchAnalyzing() && batchProgress()">Waiting for results — {{ analyzedWorkflowFiles().size }}/{{ repoWorkflows().length }} workflows analyzed so far…</span>
+  </div>
+
+  <div *ngIf="recommendations().length === 0 && !batchAnalyzing()" class="bg-white border border-zinc-200 rounded-lg shadow-sm">
     <div class="py-12 text-center text-sm text-zinc-400">
       No optimization recommendations yet. Analysis needs a completed dependency graph (Dependency Graph tab) and job timing data (a few completed runs) for this workflow first.
     </div>
