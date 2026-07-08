@@ -9,9 +9,10 @@ import { OrgService } from '../core/org.service'
 import type { LongestJobEntry, LongestWorkflowEntry, RunnerBreakdownEntry } from '../core/types'
 
 function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`
-  const m = Math.floor(seconds / 60)
-  return `${m}m ${seconds % 60}s`
+  const total = Math.round(seconds)
+  if (total < 60) return `${total}s`
+  const m = Math.floor(total / 60)
+  return `${m}m ${total % 60}s`
 }
 
 @Component({
