@@ -481,7 +481,7 @@ export interface OptimizationRecommendation {
   agent_trace: string[] | null
   created_at: string
   updated_at: string
-  current_yaml: string | null
+  original_yaml: string | null
 }
 
 export interface SimulationRun {

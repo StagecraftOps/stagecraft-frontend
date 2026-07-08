@@ -115,7 +115,7 @@ export class OptimizationComponent {
 
   diffFor(rec: OptimizationRecommendation): YamlDiffLine[] {
     if (!rec.proposed_yaml_diff) return []
-    return diffYamlLines(rec.current_yaml, rec.proposed_yaml_diff)
+    return diffYamlLines(rec.original_yaml, rec.proposed_yaml_diff)
   }
 
   addedLineCount(rec: OptimizationRecommendation): number {
