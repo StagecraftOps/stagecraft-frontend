@@ -244,10 +244,28 @@ export class ApiService {
     )
   }
 
-  fetchInsightSuggestion(page: string, metrics: Record<string, unknown>): Promise<{ suggestion: string | null }> {
-    return firstValueFrom(
+  async fetchInsightSuggestion(page: string, metrics: Record<string, unknown>): Promise<{ suggestion: string | null }> {
+    const cacheKey = `stagecraft:insight:${page}`
+    const cacheTtlMs = 30 * 60 * 1000
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) {
+        const parsed = JSON.parse(cached) as { suggestion: string | null; ts: number }
+        if (Date.now() - parsed.ts < cacheTtlMs) return { suggestion: parsed.suggestion }
+      }
+    } catch {
+      // sessionStorage unavailable or corrupt entry -- fall through to a fresh fetch
+    }
+
+    const result = await firstValueFrom(
       this.http.post<{ suggestion: string | null }>(`${API_URL}/api/v1/insights/suggest`, { page, metrics }),
     )
+    try {
+      sessionStorage.setItem(cacheKey, JSON.stringify({ suggestion: result.suggestion, ts: Date.now() }))
+    } catch {
+      // ignore storage failures (e.g. quota, private browsing)
+    }
+    return result
   }
 
   fetchCustomAgentConfig(org: string, agentKey: string, repoName: string = ''): Promise<CustomAgentConfig> {

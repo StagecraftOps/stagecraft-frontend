@@ -1,12 +1,12 @@
 <div class="p-8">
-  <app-page-header eyebrow="Overview" title="Runtime Performance" description="Longest-running jobs and workflows — pure duration ranking, no AI involved."></app-page-header>
-
-  <!-- Suggested focus: one AI-generated recommendation from the metrics below. -->
-  <div *ngIf="suggestionLoading() || suggestion()" class="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-6 bg-white dark:bg-zinc-900">
-    <p class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Suggested focus</p>
-    <div *ngIf="suggestionLoading()" class="h-4 w-2/3 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
-    <p *ngIf="!suggestionLoading() && suggestion()" class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{{ suggestion() }}</p>
-  </div>
+  <app-page-header eyebrow="Overview" title="Runtime Performance" description="Longest-running jobs and workflows — pure duration ranking, no AI involved.">
+    <!-- Suggested focus: one short AI-generated recommendation from the metrics below. -->
+    <div actions *ngIf="suggestionLoading() || suggestion()" class="border border-zinc-200 dark:border-zinc-800 rounded-lg px-3.5 py-2.5 bg-white dark:bg-zinc-900 max-w-xs">
+      <p class="text-[10px] font-medium text-zinc-400 uppercase tracking-wider mb-1">Suggested focus</p>
+      <div *ngIf="suggestionLoading()" class="h-3.5 w-32 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
+      <p *ngIf="!suggestionLoading() && suggestion()" class="text-xs text-zinc-700 dark:text-zinc-300 leading-snug">{{ suggestion() }}</p>
+    </div>
+  </app-page-header>
 
   <div class="bg-white border border-zinc-200 rounded-lg shadow-sm mb-6">
     <div class="flex flex-col space-y-1 p-5 border-b border-zinc-100">
