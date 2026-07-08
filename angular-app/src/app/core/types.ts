@@ -475,9 +475,13 @@ export interface OptimizationRecommendation {
   estimated_time_savings_seconds: number
   confidence_score: number
   status: OptimizationStatus
+  pr_url: string | null
+  pr_number: number | null
+  pr_branch: string | null
   agent_trace: string[] | null
   created_at: string
   updated_at: string
+  current_yaml: string | null
 }
 
 export interface SimulationRun {
