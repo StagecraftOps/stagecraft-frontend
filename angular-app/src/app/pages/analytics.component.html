@@ -6,6 +6,13 @@
     <p class="text-sm">Failed to load insights data.</p>
   </div>
 
+  <!-- Suggested focus: one AI-generated recommendation from the metrics below. -->
+  <div *ngIf="suggestionLoading() || suggestion()" class="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-6 bg-white dark:bg-zinc-900">
+    <p class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Suggested focus</p>
+    <div *ngIf="suggestionLoading()" class="h-4 w-2/3 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
+    <p *ngIf="!suggestionLoading() && suggestion()" class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{{ suggestion() }}</p>
+  </div>
+
   <!-- Headline KPIs: failure + remediation velocity -->
   <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
     <div class="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">

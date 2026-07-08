@@ -36,15 +36,42 @@ export class AnalyticsComponent implements OnInit {
   isLoading = signal(true)
   error = signal(false)
 
+  suggestion = signal<string | null>(null)
+  suggestionLoading = signal(false)
+
   constructor(private api: ApiService) {}
 
   async ngOnInit() {
     try {
-      this.analytics.set(await this.api.fetchAnalytics())
+      const data = await this.api.fetchAnalytics()
+      this.analytics.set(data)
+      this.loadSuggestion(data)
     } catch {
       this.error.set(true)
     } finally {
       this.isLoading.set(false)
+    }
+  }
+
+  private async loadSuggestion(data: AnalyticsData) {
+    this.suggestionLoading.set(true)
+    try {
+      const { suggestion } = await this.api.fetchInsightSuggestion('insights', {
+        failure_rate: data.failure_rate,
+        completed_runs: data.completed_runs,
+        mttr_seconds: data.mttr_seconds,
+        mttd_seconds: data.mttd_seconds,
+        remediations_raised: data.remediations_raised,
+        open_vulns_total: data.open_vulns_total,
+        open_vulns_by_severity: data.open_vulns_by_severity,
+        top_failing_repos: data.top_failing_repos,
+        top_failing_workflows: data.top_failing_workflows,
+      })
+      this.suggestion.set(suggestion)
+    } catch {
+      this.suggestion.set(null)
+    } finally {
+      this.suggestionLoading.set(false)
     }
   }
 

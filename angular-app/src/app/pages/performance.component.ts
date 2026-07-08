@@ -30,6 +30,9 @@ export class PerformanceComponent {
   runnerBreakdown = signal<RunnerBreakdownEntry[]>([])
   isLoading = signal(true)
 
+  suggestion = signal<string | null>(null)
+  suggestionLoading = signal(false)
+
   constructor(public org: OrgService, private api: ApiService) {
     effect(() => {
       if (this.org.currentOrg()) queueMicrotask(() => this.load())
@@ -47,8 +50,31 @@ export class PerformanceComponent {
       this.longestJobs.set(jobs)
       this.longestWorkflows.set(workflows)
       this.runnerBreakdown.set(runners)
+      this.loadSuggestion(jobs, workflows, runners)
     } finally {
       this.isLoading.set(false)
+    }
+  }
+
+  private async loadSuggestion(
+    jobs: LongestJobEntry[], workflows: LongestWorkflowEntry[], runners: RunnerBreakdownEntry[],
+  ) {
+    this.suggestionLoading.set(true)
+    try {
+      const { suggestion } = await this.api.fetchInsightSuggestion('performance', {
+        longest_jobs: jobs.slice(0, 5).map((j) => ({ job: j.job_name, repo: j.repo_name, seconds: j.duration_seconds })),
+        longest_workflows: workflows.slice(0, 5).map((w) => ({ workflow: w.workflow_name, repo: w.repo_name, seconds: w.duration_seconds })),
+        runner_breakdown: runners.map((r) => ({
+          runner: r.runner_labels?.length ? r.runner_labels.join(',') : 'no runner assigned',
+          job_count: r.job_count,
+          avg_duration_seconds: r.avg_duration_seconds,
+        })),
+      })
+      this.suggestion.set(suggestion)
+    } catch {
+      this.suggestion.set(null)
+    } finally {
+      this.suggestionLoading.set(false)
     }
   }
 

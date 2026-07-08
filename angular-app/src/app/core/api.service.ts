@@ -244,6 +244,12 @@ export class ApiService {
     )
   }
 
+  fetchInsightSuggestion(page: string, metrics: Record<string, unknown>): Promise<{ suggestion: string | null }> {
+    return firstValueFrom(
+      this.http.post<{ suggestion: string | null }>(`${API_URL}/api/v1/insights/suggest`, { page, metrics }),
+    )
+  }
+
   fetchCustomAgentConfig(org: string, agentKey: string, repoName: string = ''): Promise<CustomAgentConfig> {
     return firstValueFrom(
       this.http.get<CustomAgentConfig>(`${API_URL}/api/v1/orgs/${org}/custom-agents/${agentKey}`, {
