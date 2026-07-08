@@ -112,7 +112,7 @@
 
 @layer utilities {
   .font-serif-display {
-    font-family: 'Instrument Serif', Georgia, serif;
+    font-family: 'Open Sans', sans-serif;
   }
 
   .font-code {
