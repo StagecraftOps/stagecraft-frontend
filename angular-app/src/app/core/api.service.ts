@@ -31,6 +31,7 @@ import type {
   AgentRun,
   AgentFleetSummary,
   ViolationFeed,
+  VulnerabilityFinding,
   VulnerabilityFindingList,
   ApplicationContextList,
   ApplicationContext,
@@ -208,6 +209,12 @@ export class ApiService {
     )
   }
 
+  fetchVulnerabilityFinding(findingId: string): Promise<VulnerabilityFinding> {
+    return firstValueFrom(
+      this.http.get<VulnerabilityFinding>(`${API_URL}/api/v1/vulnerabilities/${findingId}`),
+    )
+  }
+
   runVulnerabilityDependencyFix(org: string, repo: string): Promise<{ status: string }> {
     return firstValueFrom(
       this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/run`, {
@@ -226,11 +233,12 @@ export class ApiService {
     )
   }
 
-  runAgenticRemediation(org: string, repo: string): Promise<{ status: string }> {
+  runAgenticRemediation(org: string, repo: string, findingId?: string): Promise<{ status: string }> {
     return firstValueFrom(
       this.http.post<{ status: string }>(`${API_URL}/api/v1/vulnerabilities/remediation/run-agentic`, {
         org_login: org,
         repo_name: repo,
+        finding_id: findingId || null,
       }),
     )
   }

@@ -117,6 +117,9 @@ function sourceLabel(source: string): string {
                 <a *ngIf="f.github_issue_url" [href]="f.github_issue_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 hover:text-amber-600 transition-colors">
                   Issue #{{ f.github_issue_number }} <lucide-angular [img]="icons.ExternalLink" [size]="11"></lucide-angular>
                 </a>
+                <a [routerLink]="['/vulnerability-remediation', f.id]" class="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 hover:underline font-medium ml-auto">
+                  <lucide-angular [img]="icons.Send" [size]="11"></lucide-angular> Deploy fix →
+                </a>
               </div>
             </div>
           </div>

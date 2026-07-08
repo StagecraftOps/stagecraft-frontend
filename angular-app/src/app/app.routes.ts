@@ -49,6 +49,7 @@ export const routes: Routes = [
       { path: 'audit', component: AuditComponent },
       { path: 'vulnerabilities', component: VulnerabilitiesComponent },
       { path: 'vulnerability-remediation', component: VulnerabilityRemediationComponent },
+      { path: 'vulnerability-remediation/:findingId', component: VulnerabilityRemediationComponent },
       { path: 'remediation', component: RemediationListComponent },
       { path: 'remediation/:id', component: RemediationDetailComponent },
       { path: 'pr-reviews', component: PrReviewsComponent },
